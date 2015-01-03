@@ -11,6 +11,15 @@
 
 namespace nekotama
 {
+	/// @brief 监听器
+	struct IServerListener
+	{
+		virtual void OnCreateSession(ClientSession* pSession) = 0;
+		virtual void OnCloseSession(ClientSession* pSession) = 0;
+
+	};
+
+	/// @brief 服务
 	class Server
 	{
 		/// @brief 消息类型
@@ -26,10 +35,17 @@ namespace nekotama
 		struct Message
 		{
 			MessageType Type;
+			uint32_t SessionCount;
 			union
 			{
 				ClientSession* Session;
 			};
+
+			Message& WithSessionCount(uint32_t c)
+			{
+				SessionCount = c;
+				return *this;
+			}
 			Message()
 				: Type(MessageType::None) {}
 			Message(MessageType type)
@@ -40,8 +56,9 @@ namespace nekotama
 	private:
 		ISocketFactory* m_pFactory;
 		ILogger* m_pLogger;
+		IServerListener* m_pListener;
 		uint16_t m_Port;
-		uint16_t m_Clients;
+		uint16_t m_MaxClients;
 
 		SocketHandle m_Socket;
 
@@ -57,6 +74,10 @@ namespace nekotama
 		void socketThreadLoop()NKNOEXCEPT;
 		void messageThreadLoop()NKNOEXCEPT;
 	public:
+		/// @brief 获取监听器
+		IServerListener* GetListener() { return m_pListener; }
+		/// @brief 设置监听器
+		void SetListener(IServerListener* pListener) { m_pListener = pListener; }
 		/// @brief 启动服务
 		/// @note  异步调用
 		void Start();

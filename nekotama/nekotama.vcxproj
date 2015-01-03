@@ -65,7 +65,7 @@
       <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>XCOPY /Y /D "bin\nekotama_d.dll" "$(SolutionDir)\nekotama_injecter\bin"</Command>
+      <Command>XCOPY /Y /D "bin\nekotama_d.dll" "$(SolutionDir)\nekotama_injecter\bin\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -88,7 +88,7 @@
       <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>XCOPY /Y /D "bin\nekotama.dll" "$(SolutionDir)\nekotama_injecter\bin"</Command>
+      <Command>XCOPY /Y /D "bin\nekotama.dll" "$(SolutionDir)\nekotama_injecter\bin\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

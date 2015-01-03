@@ -31,6 +31,20 @@ public:
 	}
 } g_Logger;
 
+class ServerListener :
+	public IServerListener
+{
+public:
+	void OnCreateSession(ClientSession* pSession)
+	{
+		g_Logger.Log("客户端会话建立", LogType::Infomation);
+	}
+	void OnCloseSession(ClientSession* pSession)
+	{
+		g_Logger.Log("客户端会话关闭", LogType::Infomation);
+	}
+};
+
 int main()
 {
 	nekotama::Server tServer(&SocketFactory::GetInstance(), &g_Logger);

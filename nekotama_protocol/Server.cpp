@@ -12,8 +12,8 @@ using namespace nekotama;
 ////////////////////////////////////////////////////////////////////////////////
 
 Server::Server(ISocketFactory* pFactory, ILogger* pLogger, uint16_t port, uint16_t maxClient)
-	: m_pFactory(pFactory), m_pLogger(pLogger), m_Port(port), m_Clients(maxClient),
-	m_stopFlag(false), m_bRunning(false)
+	: m_pFactory(pFactory), m_pLogger(pLogger), m_Port(port), m_MaxClients(maxClient),
+	m_stopFlag(false), m_bRunning(false), m_pListener(nullptr)
 {
 	// 创建Socket对象
 	m_Socket = m_pFactory->Create(SocketType::TCP);
@@ -124,7 +124,7 @@ void Server::socketThreadLoop()NKNOEXCEPT
 									);
 
 									// 发送一个消息
-									m_MsgQueue.Push(Message(MessageType::ClientArrival, tSession.get()));
+									m_MsgQueue.Push(Message(MessageType::ClientArrival, tSession.get()).WithSessionCount(tSessions.size()));
 								}
 							}
 							catch (const std::exception& e)
@@ -302,6 +302,12 @@ void Server::socketThreadLoop()NKNOEXCEPT
 				break;
 			}
 		}
+
+		// 发送关闭消息
+		for (auto i : tSessions)
+		{
+			m_MsgQueue.Push(Message(MessageType::ClientRemoved, i.second.get()));
+		}
 	}
 
 	// 通知消息线程停止工作
@@ -324,8 +330,45 @@ void Server::messageThreadLoop()NKNOEXCEPT
 		case MessageType::WorkStopped:
 			return;  // 结束工作
 		case MessageType::ClientArrival:
+			if (tMsg.SessionCount > m_MaxClients)
+			{
+				// 超出会话数，关闭
+				/// ! TODO
+				// tMsg.Session->Send_ConnectClosed();
+			}
+			else
+			{
+				try
+				{
+					if (m_pListener)
+						m_pListener->OnCreateSession(tMsg.Session);
+				}
+				catch (const std::exception& e)
+				{
+					m_pLogger->Log(
+						StringFormat(
+						"MessageThread: exception occured invoking OnCreateSession. (%s)",
+						e.what()),
+						LogType::Error
+						);
+				}
+			}
 			break;
 		case MessageType::ClientRemoved:
+			try
+			{
+				if (m_pListener)
+					m_pListener->OnCloseSession(tMsg.Session);
+			}
+			catch (const std::exception& e)
+			{
+				m_pLogger->Log(
+					StringFormat(
+						"MessageThread: exception occured invoking OnCloseSession. (%s)",
+						e.what()),
+					LogType::Error
+					);
+			}
 			break;
 		case MessageType::ClientPackageArrival:
 			break;

@@ -16,6 +16,8 @@ namespace nekotama
 	class ClientSession
 	{
 		friend class Server;
+	public:
+		typedef std::deque<uint8_t> BufferType;
 	private:
 		ILogger* m_pLogger;
 		SocketHandle m_Socket;
@@ -24,9 +26,8 @@ namespace nekotama
 
 		// 数据缓冲区
 		PackageValidChecker m_Checker;
-
-		std::deque<uint8_t> m_RecvBuf;
-		std::deque<uint8_t> m_SendBuf;
+		BufferType m_RecvBuf;
+		BufferType m_SendBuf;
 	public:
 		const std::string& GetIP()const { return m_IP; }
 		uint16_t GetPort()const { return m_Port; }
@@ -39,6 +40,10 @@ namespace nekotama
 		void SendData();
 		/// @brief  计时器计数
 		void Tick(uint32_t TickCount);
+		/// @brief  获取读取缓冲区
+		const BufferType& GetReadBuffer()const { return m_RecvBuf; }
+		/// @brief  获取写入缓冲区
+		BufferType& GetWriteBuffer() { return m_SendBuf; }
 	public:
 		ClientSession(SocketHandle handle, const std::string& ip, uint16_t port, ILogger* pLogger);
 	};
