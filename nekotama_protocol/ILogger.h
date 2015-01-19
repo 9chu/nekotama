@@ -14,6 +14,6 @@ namespace nekotama
 	/// @note  该接口必须为线程安全的
 	struct ILogger
 	{
-		virtual void Log(const std::string& info, LogType type = LogType::Infomation) = 0;
+		virtual void Log(const std::string& info, LogType type = LogType::Infomation)NKNOEXCEPT = 0;
 	};
 }

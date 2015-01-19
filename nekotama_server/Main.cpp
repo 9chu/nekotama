@@ -1,8 +1,11 @@
 #include <iostream>
 #include <vector>
+#include <mutex>
 
 #include <Socket.h>
 #include <Server.h>
+
+#include "ConsoleColor.h"
 
 using namespace std;
 using namespace nekotama;
@@ -13,41 +16,36 @@ class StdOutLogger :
 private:
 	std::mutex m_Lock;
 public:
-	void Log(const std::string& info, LogType type)
+	void Log(const std::string& info, LogType type)NKNOEXCEPT
 	{
 		std::lock_guard<std::mutex> scope(m_Lock);
 		switch (type)
 		{
 		case LogType::Infomation:
-			cout << "[信息]" << info << endl;
+			SetConsoleTextColor(ConsoleColors::Grey);
+			printf("[信息] %s\n", info.c_str());
 			break;
 		case LogType::Warning:
-			cout << "[警告]" << info << endl;
+			SetConsoleTextColor(ConsoleColors::Yellow);
+			printf("[警告] %s\n", info.c_str());
 			break;
 		case LogType::Error:
-			cout << "[错误]" << info << endl;
+			SetConsoleTextColor(ConsoleColors::RedOrange);
+			printf("[错误] %s\n", info.c_str());
 			break;
 		}
 	}
 } g_Logger;
 
 class ServerListener :
-	public IServerListener
+	public Server
 {
 public:
-	void OnCreateSession(ClientSession* pSession)
-	{
-		g_Logger.Log("客户端会话建立", LogType::Infomation);
-	}
-	void OnCloseSession(ClientSession* pSession)
-	{
-		g_Logger.Log("客户端会话关闭", LogType::Infomation);
-	}
 };
 
 int main()
 {
-	nekotama::Server tServer(&SocketFactory::GetInstance(), &g_Logger);
+	nekotama::Server tServer(&SocketFactory::GetInstance(), &g_Logger, "chu's server", 3);
 	tServer.Start();
 	tServer.Wait();
 	system("pause");

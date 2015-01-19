@@ -58,13 +58,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\nekotama_socket\bin\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>nekotama_protocol_d.lib;nekotama_socket_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\nekotama_socket\bin\;$(SolutionDir)\extern\Bencode\Bencode\bin\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>nekotama_protocol_d.lib;nekotama_socket_d.lib;ws2_32.lib;Bencode_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -78,19 +78,23 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\nekotama_socket\bin\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>nekotama_protocol.lib;nekotama_socket_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\nekotama_socket\bin\;$(SolutionDir)\extern\Bencode\Bencode\bin\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>nekotama_protocol.lib;nekotama_socket_d.lib;ws2_32.lib;Bencode.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConsoleColor.cpp" />
     <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConsoleColor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

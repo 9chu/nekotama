@@ -14,12 +14,11 @@
     <ClInclude Include="ClientSession.h" />
     <ClInclude Include="ConcurrentQueue.h" />
     <ClInclude Include="ILogger.h" />
-    <ClInclude Include="Package.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientSession.cpp" />
-    <ClCompile Include="Package.cpp" />
     <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -68,7 +67,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_socket\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -86,7 +85,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_socket\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

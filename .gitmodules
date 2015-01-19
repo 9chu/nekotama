@@ -1,0 +1,3 @@
+[submodule "extern/Bencode"]
+	path = extern/Bencode
+	url = http://github.com/9chu/Bencode

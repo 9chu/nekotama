@@ -153,7 +153,7 @@ bool SocketFactory::Select(SocketHandleSet* read, SocketHandleSet* write, Socket
 		read->size() > 0 ? &tRead : nullptr,
 		write->size() > 0 ? &tWrite : nullptr,
 		error->size() > 0 ? &tError : nullptr,
-		&t
+		timeout == (uint32_t)-1 ? nullptr : &t
 	);
 	if (tRet == SOCKET_ERROR || tRet == 0)
 	{

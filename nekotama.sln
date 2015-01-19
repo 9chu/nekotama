@@ -16,6 +16,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nekotama_protocol", "nekotama_protocol\nekotama_protocol.vcxproj", "{B6EB23A5-BA00-430D-BDFA-970DC3E4282E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{DC3F0820-7C2B-4D39-BC62-E37612F0EE1B} = {DC3F0820-7C2B-4D39-BC62-E37612F0EE1B}
+		{F90DE97C-235D-4272-BE10-D94EB7D92380} = {F90DE97C-235D-4272-BE10-D94EB7D92380}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nekotama_server", "nekotama_server\nekotama_server.vcxproj", "{27ACF7C9-C3BB-436B-9654-6D47ECC485E3}"
@@ -24,6 +25,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nekotama_server", "nekotama
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nekotama_socket", "nekotama_socket\nekotama_socket.vcxproj", "{DC3F0820-7C2B-4D39-BC62-E37612F0EE1B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extern", "extern", "{41A6EDAA-CA70-4C03-9EC5-111E346E9AAC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bencode", "extern\Bencode\Bencode\Bencode.vcxproj", "{F90DE97C-235D-4272-BE10-D94EB7D92380}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,8 +56,15 @@ Global
 		{DC3F0820-7C2B-4D39-BC62-E37612F0EE1B}.Debug|Win32.Build.0 = Debug|Win32
 		{DC3F0820-7C2B-4D39-BC62-E37612F0EE1B}.Release|Win32.ActiveCfg = Release|Win32
 		{DC3F0820-7C2B-4D39-BC62-E37612F0EE1B}.Release|Win32.Build.0 = Release|Win32
+		{F90DE97C-235D-4272-BE10-D94EB7D92380}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F90DE97C-235D-4272-BE10-D94EB7D92380}.Debug|Win32.Build.0 = Debug|Win32
+		{F90DE97C-235D-4272-BE10-D94EB7D92380}.Release|Win32.ActiveCfg = Release|Win32
+		{F90DE97C-235D-4272-BE10-D94EB7D92380}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F90DE97C-235D-4272-BE10-D94EB7D92380} = {41A6EDAA-CA70-4C03-9EC5-111E346E9AAC}
 	EndGlobalSection
 EndGlobal

@@ -2,97 +2,59 @@
 #include <atomic>
 #include <thread>
 #include <stdexcept>
+#include <unordered_map>
 
-#include <ISocket.h>
-
-#include "ILogger.h"
-#include "ConcurrentQueue.h"
 #include "ClientSession.h"
 
 namespace nekotama
 {
-	/// @brief 监听器
-	struct IServerListener
-	{
-		virtual void OnCreateSession(ClientSession* pSession) = 0;
-		virtual void OnCloseSession(ClientSession* pSession) = 0;
-
-	};
-
 	/// @brief 服务
 	class Server
 	{
-		/// @brief 消息类型
-		enum class MessageType
-		{
-			None = 0,
-			WorkStopped,
-			ClientArrival,
-			ClientRemoved,
-			ClientPackageArrival
-		};
-		/// @brief 消息
-		struct Message
-		{
-			MessageType Type;
-			uint32_t SessionCount;
-			union
-			{
-				ClientSession* Session;
-			};
-
-			Message& WithSessionCount(uint32_t c)
-			{
-				SessionCount = c;
-				return *this;
-			}
-			Message()
-				: Type(MessageType::None) {}
-			Message(MessageType type)
-				: Type(type) {}
-			Message(MessageType type, ClientSession* session)
-				: Type(type), Session(session) {}
-		};
+		friend class ClientSession;
 	private:
 		ISocketFactory* m_pFactory;
 		ILogger* m_pLogger;
-		IServerListener* m_pListener;
-		uint16_t m_Port;
-		uint16_t m_MaxClients;
+		uint16_t m_uPort;
+		uint16_t m_uMaxClients;
+		std::string m_sServerName;
 
-		SocketHandle m_Socket;
+		SocketHandle m_srvSocket;
 
 		// 线程状态
 		std::atomic<bool> m_stopFlag;  // 通知线程停止工作的标记
 		std::atomic<bool> m_bRunning;  // 指示服务端是否在运行
-		std::shared_ptr<std::thread> m_tSocket;  // Socket与计时器工作线程
-		std::shared_ptr<std::thread> m_tMsgWork;  // 消息处理线程
+		std::shared_ptr<std::thread> m_threadMain;  // 主工作线程
 
-		// 消息队列
-		ConcurrentQueue<Message> m_MsgQueue;
-	protected:
-		void socketThreadLoop()NKNOEXCEPT;
-		void messageThreadLoop()NKNOEXCEPT;
+		// 会话列表
+		std::unordered_map<SocketHandle, ClientSessionHandle> m_mpClients;
+	private:
+		void mainThreadLoop()NKNOEXCEPT;
 	public:
-		/// @brief 获取监听器
-		IServerListener* GetListener() { return m_pListener; }
-		/// @brief 设置监听器
-		void SetListener(IServerListener* pListener) { m_pListener = pListener; }
+		ISocketFactory* GetSocketFactory()NKNOEXCEPT { return m_pFactory; }
+		ILogger* GetLogger()NKNOEXCEPT { return m_pLogger; }
+		uint16_t GetMaxClients()NKNOEXCEPT { return m_uMaxClients; }
+		const std::string& GetServerName()NKNOEXCEPT { return m_sServerName; }
+
 		/// @brief 启动服务
 		/// @note  异步调用
 		void Start();
 		/// @brief 结束服务
 		/// @note  异步调用
-		void End();
+		void Stop();
 		/// @brief 等待服务线程终止
 		void Wait();
 		/// @brief 是否在运行
-		bool IsRunning()const throw();
+		bool IsRunning()const NKNOEXCEPT;
+	protected:  // 可以实现的函数
+		virtual void OnClientArrival(ClientSession* client, bool kicked_for_full) {}
+		virtual void OnClientLeave(ClientSession* client) {}
+		virtual void OnClientInvalid(ClientSession* client) {}
 	private:
 		Server& operator=(const Server&);
 		Server(const Server&);
 	public:
 		/// @brief 初始化服务
-		Server(ISocketFactory* pFactory, ILogger* pLogger, uint16_t port = 12801, uint16_t maxClient = 32);
+		Server(ISocketFactory* pFactory, ILogger* pLogger, const std::string& server_name, uint16_t maxClient = 16, uint16_t port = 12801);
 	};
 }

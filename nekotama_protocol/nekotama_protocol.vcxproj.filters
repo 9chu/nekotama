@@ -27,7 +27,7 @@
     <ClInclude Include="ILogger.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Package.h">
+    <ClInclude Include="Version.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -36,9 +36,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ClientSession.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Package.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
