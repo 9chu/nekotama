@@ -150,9 +150,9 @@ bool SocketFactory::Select(SocketHandleSet* read, SocketHandleSet* write, Socket
 		return false;
 	int tRet = select(
 		tCount,
-		read->size() > 0 ? &tRead : nullptr,
-		write->size() > 0 ? &tWrite : nullptr,
-		error->size() > 0 ? &tError : nullptr,
+		!read || read->size() > 0 ? &tRead : nullptr,
+		!write || write->size() > 0 ? &tWrite : nullptr,
+		!error || error->size() > 0 ? &tError : nullptr,
 		timeout == (uint32_t)-1 ? nullptr : &t
 	);
 	if (tRet == SOCKET_ERROR || tRet == 0)

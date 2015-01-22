@@ -10,40 +10,10 @@ using namespace nekotama;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static const chrono::milliseconds sc_RecvTimeout(10000);    // 10秒收发延迟
-static const chrono::milliseconds sc_LoginTimeout(5000);    // 5秒登陆延迟
-static const chrono::milliseconds sc_PingPongTimeout(5000); // 5秒pingpong延迟
-
-////////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-static T GetPackageField(const Bencode::Value& v, const std::string& field);
-
-template<>
-static int GetPackageField(const Bencode::Value& v, const std::string& field)
-{
-	if (v.Type != ValueType::Dictionary)
-		throw logic_error("invalid package format.");
-	auto tField = v.VDict.find(field);
-	if (tField == v.VDict.end())
-		throw logic_error(StringFormat("invalid package format, field '%s' required.", field.c_str()));
-	if (tField->second->Type != ValueType::Int)
-		throw logic_error(StringFormat("invalid package format, field '%s' should be an integer.", field.c_str()));
-	return tField->second->VInt;
-}
-
-template<>
-static const std::string& GetPackageField(const Bencode::Value& v, const std::string& field)
-{
-	if (v.Type != ValueType::Dictionary)
-		throw logic_error("invalid package format.");
-	auto tField = v.VDict.find(field);
-	if (tField == v.VDict.end())
-		throw logic_error(StringFormat("invalid package format, field '%s' required.", field.c_str()));
-	if (tField->second->Type != ValueType::String)
-		throw logic_error(StringFormat("invalid package format, field '%s' should be a string.", field.c_str()));
-	return tField->second->VString;
-}
+static const chrono::milliseconds sc_RecvTimeout(10000);  // 10秒收发延迟
+static const chrono::milliseconds sc_LoginTimeout(5000);  // 5秒登陆延迟
+static const chrono::milliseconds sc_PingPeriod(3000);  // 3秒发送1ping
+static const chrono::milliseconds sc_PongTimeout(3000);  // 3秒pong延迟
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -100,12 +70,13 @@ void ClientSession::sendKicked(KickReason reason)
 	push(tPackage);
 }
 
-void ClientSession::sendLoginConfirm(const std::string& nick, const std::string& addr)
+void ClientSession::sendLoginConfirm(const std::string& nick, const std::string& addr, uint16_t port)
 {
 	Value tPackage(ValueType::Dictionary);
 	tPackage.VDict["type"] = make_shared<Value>((IntType)PackageType::LoginConfirm);
 	tPackage.VDict["nick"] = make_shared<Value>(nick);
 	tPackage.VDict["addr"] = make_shared<Value>(addr);
+	tPackage.VDict["port"] = make_shared<Value>((IntType)port);
 	push(tPackage);
 }
 
@@ -129,7 +100,7 @@ void ClientSession::push(const Bencode::Value& v)
 
 void ClientSession::poll(const Bencode::Value& v)
 {
-	PackageType tPakType = (PackageType)GetPackageField<int>(v, "type");
+	PackageType tPakType = (PackageType)PackageHelper::GetPackageField<int>(v, "type");
 	switch (tPakType)
 	{
 	case PackageType::Login:
@@ -137,19 +108,28 @@ void ClientSession::poll(const Bencode::Value& v)
 			throw logic_error("invalid 'login' package.");
 		else
 		{
-			std::string tNickname = GetPackageField<const string&>(v, "nick");
+			std::string tNickname = PackageHelper::GetPackageField<const string&>(v, "nick");
 			std::string tAddr;
-			if (m_pServer->OnClientLogin(this, tNickname, tAddr))
+			uint16_t tPort = 10800;  // 非想天则的默认游戏端口
+			if (m_pServer->OnClientLogin(this, tNickname, tAddr, tPort))
 			{
-				sendLoginConfirm(tNickname, tAddr);  // 登陆成功
+				m_Nickname = tNickname;
+				m_VirtualAddr = tAddr;
+				
+				sendLoginConfirm(tNickname, tAddr, tPort);  // 登陆成功
 				m_iState = ClientSessionState::Logined;
 				m_bPingSent = false;
-				m_iPongTimeout = chrono::milliseconds::zero();
-				m_iRecvTimeout = chrono::milliseconds::zero();
+				m_iPongTimer = chrono::milliseconds::zero();
+				m_iPingTimer = chrono::milliseconds::zero();
+				m_iRecvTimer = chrono::milliseconds::zero();
 				m_iDelay = chrono::milliseconds::zero();
+
+				m_pLogger->Log(StringFormat("客户端登陆成功，昵称: %s，虚拟ip: %s。(%s:%u)", tNickname.c_str(), tAddr.c_str(), m_sIP.c_str(), m_uPort));
 			}
 			else
 			{
+				m_pLogger->Log(StringFormat("客户端登陆失败。(%s:%u)", m_sIP.c_str(), m_uPort));
+
 				sendKicked(KickReason::LoginFailed);  // 登陆失败
 				m_iState = ClientSessionState::CloseAfterSend;
 			}	
@@ -159,16 +139,24 @@ void ClientSession::poll(const Bencode::Value& v)
 		if (m_iState == ClientSessionState::Logined && m_bPingSent)
 		{
 			m_bPingSent = false;
-			m_iDelay = m_iPongTimeout;
-			m_iPongTimeout = chrono::milliseconds::zero();
+			m_iDelay = m_iPongTimer;
+			m_iPongTimer = chrono::milliseconds::zero();
 		}
 		break;
+	case PackageType::Logout:
+		m_iState = ClientSessionState::CloseAfterSend;
+		m_bShouldBeClosed = true;
+		m_pLogger->Log(StringFormat("客户端登出，昵称: %s，虚拟ip: %s。(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
+		m_pServer->OnClientLogout(this);
+		break;
+	default:
+		throw logic_error("unexpected package type.");
 	}
 }
 
 void ClientSession::recv()
 {
-	m_iRecvTimeout = chrono::milliseconds::zero();
+	m_iRecvTimer = chrono::milliseconds::zero();
 
 	if (!m_bShouldBeClosed && m_iState != ClientSessionState::Invalid)
 	{
@@ -192,7 +180,7 @@ void ClientSession::recv()
 			}
 			else
 				break;
-		} while (tReaded >= sizeof(tBuf));
+		} while (tReaded >= sizeof(tBuf));  // 当且仅当tReaded == sizeof(tBuf)时说明还有数据没读完
 	}
 }
 
@@ -235,18 +223,31 @@ void ClientSession::update(std::chrono::milliseconds tick)
 	switch (m_iState)
 	{
 	case ClientSessionState::WaitForLogin:
-		m_iLoginTimeout += tick;
-		if (m_iLoginTimeout > sc_LoginTimeout)
+		m_iLoginTimer += tick;
+		if (m_iLoginTimer > sc_LoginTimeout)
 			throw logic_error(StringFormat("login timeout in %d ms.", sc_LoginTimeout));
 		break;
 	case ClientSessionState::Logined:
-		m_iPongTimeout += tick;
-		if (m_iPongTimeout > sc_PingPongTimeout)
-			throw logic_error(StringFormat("pong timeout in %d ms.", sc_PingPongTimeout));
+		if (m_bPingSent)
+		{
+			m_iPongTimer += tick;
+			if (m_iPongTimer > sc_PongTimeout)
+				throw logic_error(StringFormat("pong timeout in %d ms.", sc_PongTimeout));
+		}
+		else
+		{
+			m_iPingTimer += tick;
+			if (m_iPingTimer > sc_PingPeriod)
+			{
+				sendPing();
+				m_bPingSent = true;
+				m_iPingTimer = chrono::milliseconds::zero();
+			}
+		}
 		break;
 	}
 
-	m_iRecvTimeout += tick;
-	if (m_iRecvTimeout > sc_RecvTimeout)
+	m_iRecvTimer += tick;
+	if (m_iRecvTimer > sc_RecvTimeout)
 		throw logic_error(StringFormat("no data transfer in %d ms.", sc_RecvTimeout.count()));
 }

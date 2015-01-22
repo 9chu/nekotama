@@ -47,10 +47,11 @@ namespace nekotama
 		/// @brief 是否在运行
 		bool IsRunning()const NKNOEXCEPT;
 	protected:  // 可以实现的函数
-		virtual void OnClientArrival(ClientSession* client, bool kicked_for_full) {}
-		virtual void OnClientLeave(ClientSession* client) {}
-		virtual void OnClientInvalid(ClientSession* client) {}
-		virtual bool OnClientLogin(ClientSession* client, std::string& nick, std::string& addr) { return false; }
+		virtual void OnClientArrival(ClientSession* client, bool kicked_for_full)NKNOEXCEPT {}
+		virtual void OnClientLeave(ClientSession* client)NKNOEXCEPT {}
+		virtual void OnClientInvalid(ClientSession* client)NKNOEXCEPT {}
+		virtual bool OnClientLogin(ClientSession* client, std::string& nick, std::string& addr, uint16_t port)NKNOEXCEPT { return false; }
+		virtual void OnClientLogout(ClientSession* client)NKNOEXCEPT {}
 	private:
 		Server& operator=(const Server&);
 		Server(const Server&);

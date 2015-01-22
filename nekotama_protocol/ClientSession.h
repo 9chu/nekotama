@@ -42,11 +42,15 @@ namespace nekotama
 		std::string m_sLastData;
 		size_t m_iLastDataNotSent;
 
+		std::string m_Nickname;
+		std::string m_VirtualAddr;
+
 		// === 计时器部分 ===
 		bool m_bPingSent;
-		std::chrono::milliseconds m_iLoginTimeout;  // 距离login被收到经过的时间
-		std::chrono::milliseconds m_iPongTimeout;  // 距离pong被收到经过的时间
-		std::chrono::milliseconds m_iRecvTimeout;  // 距离上次接受到数据包经过的时间
+		std::chrono::milliseconds m_iLoginTimer;  // 距离login被收到经过的时间
+		std::chrono::milliseconds m_iPingTimer;  // 距离ping被发送经过的时间
+		std::chrono::milliseconds m_iPongTimer;  // 距离pong被收到经过的时间
+		std::chrono::milliseconds m_iRecvTimer;  // 距离上次接受到数据包经过的时间
 		std::chrono::milliseconds m_iDelay;  // 通信延迟
 	public:
 		SocketHandle GetSocket()NKNOEXCEPT { return m_cltSocket; }
@@ -57,7 +61,7 @@ namespace nekotama
 	protected:
 		void sendWelcome(const std::string& server_name, uint32_t protocol_maj, uint32_t protocol_min);
 		void sendKicked(KickReason reason);
-		void sendLoginConfirm(const std::string& nick, const std::string& addr);
+		void sendLoginConfirm(const std::string& nick, const std::string& addr, uint16_t port);
 		void sendPing();
 	protected:
 		void push(const Bencode::Value& v);  // 填报文

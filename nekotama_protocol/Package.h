@@ -1,4 +1,9 @@
 #pragma once
+#include <stdexcept>
+#include <string>
+
+#include <ISocket.h>
+#include <Bencode.h>
 
 #define NK_PROTOCOL_MAJOR 0  ///< @brief 协议主版本号
 #define NK_PROTOCOL_MINOR 1  ///< @brief 协议次版本号
@@ -18,6 +23,7 @@ namespace nekotama
 			4. 登陆确认
 				nick        登陆后实际昵称
 				addr        从服务端获得的虚拟ip地址
+				port        游戏端口，用于建立房间
 			5. PING
 			6. PONG
 			7. 登出
@@ -39,7 +45,39 @@ namespace nekotama
 	enum class KickReason
 	{
 		ServerIsFull,
-		Timeout,
+		ServerClosed,
 		LoginFailed
 	};
+
+	namespace PackageHelper
+	{
+		template<typename T>
+		static T GetPackageField(const Bencode::Value& v, const std::string& field);
+
+		template<>
+		static int GetPackageField(const Bencode::Value& v, const std::string& field)
+		{
+			if (v.Type != Bencode::ValueType::Dictionary)
+				throw std::logic_error("invalid package format.");
+			auto tField = v.VDict.find(field);
+			if (tField == v.VDict.end())
+				throw std::logic_error(StringFormat("invalid package format, field '%s' required.", field.c_str()));
+			if (tField->second->Type != Bencode::ValueType::Int)
+				throw std::logic_error(StringFormat("invalid package format, field '%s' should be an integer.", field.c_str()));
+			return tField->second->VInt;
+		}
+
+		template<>
+		static const std::string& GetPackageField(const Bencode::Value& v, const std::string& field)
+		{
+			if (v.Type != Bencode::ValueType::Dictionary)
+				throw std::logic_error("invalid package format.");
+			auto tField = v.VDict.find(field);
+			if (tField == v.VDict.end())
+				throw std::logic_error(StringFormat("invalid package format, field '%s' required.", field.c_str()));
+			if (tField->second->Type != Bencode::ValueType::String)
+				throw std::logic_error(StringFormat("invalid package format, field '%s' should be a string.", field.c_str()));
+			return tField->second->VString;
+		}
+	}
 }

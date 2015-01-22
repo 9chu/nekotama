@@ -1,10 +1,10 @@
 #include "Server.h"
 
-using namespace std;
-using namespace nekotama;
-
 // 最小的计时时间步
 #define TIMETICKSTEP 16
+
+using namespace std;
+using namespace nekotama;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -84,10 +84,9 @@ void Server::mainThreadLoop()NKNOEXCEPT
 		tReadHandles.insert(m_srvSocket);
 
 		// 进行select
-		bool bBlockSelect = m_mpClients.size() == 0;
 		try
 		{	
-			if (m_pFactory->Select(&tReadHandles, &tWriteHandles, &tErrorHandles, bBlockSelect ? (uint32_t) - 1 : TIMETICKSTEP))
+			if (m_pFactory->Select(&tReadHandles, &tWriteHandles, &tErrorHandles, TIMETICKSTEP))
 			{
 				// 检查可读性
 				for (auto i : tReadHandles)
@@ -171,8 +170,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 		
 		auto tCur = std::chrono::system_clock::now();
 		chrono::milliseconds tTick = chrono::milliseconds::zero();
-		if (!bBlockSelect)
-			 tTick = chrono::duration_cast<chrono::milliseconds>(tCur - tLast);
+		tTick = chrono::duration_cast<chrono::milliseconds>(tCur - tLast);
 		tLast = tCur;
 
 		// 刷新计数器并检查客户端是否存活
