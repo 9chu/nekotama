@@ -50,6 +50,7 @@ namespace nekotama
 		virtual void OnClientArrival(ClientSession* client, bool kicked_for_full) {}
 		virtual void OnClientLeave(ClientSession* client) {}
 		virtual void OnClientInvalid(ClientSession* client) {}
+		virtual bool OnClientLogin(ClientSession* client, std::string& nick, std::string& addr) { return false; }
 	private:
 		Server& operator=(const Server&);
 		Server(const Server&);

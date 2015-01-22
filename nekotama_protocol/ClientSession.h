@@ -1,9 +1,11 @@
 #pragma once
 #include <deque>
+#include <chrono>
 
 #include <Bencode.h>
 #include <ISocket.h>
 
+#include "Package.h"
 #include "ILogger.h"
 
 namespace nekotama
@@ -12,27 +14,6 @@ namespace nekotama
 	class ClientSession;
 	typedef std::shared_ptr<ClientSession> ClientSessionHandle;
 	
-	/// @brief 数据包类型
-	enum class ClientSessionPackageType
-	{
-		Welcome = 1,
-		Kicked = 2,
-		// Login = 3,
-		LoginConfirm = 4,
-		Ping = 5,
-		// Pong = 6,
-		// Logout = 7
-	};
-
-	/// @brief 客户端会话踢出原因
-	enum class ClientSessionKickReason
-	{
-		ServerIsFull,
-		Timeout,
-		WrongUsername,
-		WrongPasswd
-	};
-
 	/// @brief 用户会话
 	class ClientSession
 	{
@@ -43,6 +24,7 @@ namespace nekotama
 
 			CloseAfterSend,
 			WaitForLogin,
+			Logined
 		};
 	private:
 		Server* m_pServer;
@@ -59,24 +41,31 @@ namespace nekotama
 		std::deque<std::string> m_dataBuf;
 		std::string m_sLastData;
 		size_t m_iLastDataNotSent;
+
+		// === 计时器部分 ===
+		bool m_bPingSent;
+		std::chrono::milliseconds m_iLoginTimeout;  // 距离login被收到经过的时间
+		std::chrono::milliseconds m_iPongTimeout;  // 距离pong被收到经过的时间
+		std::chrono::milliseconds m_iRecvTimeout;  // 距离上次接受到数据包经过的时间
+		std::chrono::milliseconds m_iDelay;  // 通信延迟
 	public:
 		SocketHandle GetSocket()NKNOEXCEPT { return m_cltSocket; }
 		const std::string& GetIP()const NKNOEXCEPT { return m_sIP; }
 		uint16_t GetPort()const NKNOEXCEPT { return m_uPort; }
 		bool ShouldBeClosed()const NKNOEXCEPT{ return m_bShouldBeClosed; }
 		bool HasData()const NKNOEXCEPT{ return m_iLastDataNotSent > 0 || !m_dataBuf.empty(); }
-	public:  // 数据包发送
-		void SendWelcome(const std::string& server_name, uint32_t protocol_maj, uint32_t protocol_min);
-		void SendKicked(ClientSessionKickReason reason);
-		void SendLoginConfirm();
-		void SendPing();
+	protected:
+		void sendWelcome(const std::string& server_name, uint32_t protocol_maj, uint32_t protocol_min);
+		void sendKicked(KickReason reason);
+		void sendLoginConfirm(const std::string& nick, const std::string& addr);
+		void sendPing();
 	protected:
 		void push(const Bencode::Value& v);  // 填报文
 		void poll(const Bencode::Value& v);  // 处理报文
 		void recv();  // 通知接收并处理数据
 		void send();  // 通知发送数据（若有）
 		void invalid();  // 通知会话已经无效
-		void update(uint32_t tick);  // 通知更新时钟
+		void update(std::chrono::milliseconds tick);  // 通知更新时钟
 	private:
 		ClientSession& operator=(const ClientSession&);
 		ClientSession(const ClientSession&);

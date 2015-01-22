@@ -14,8 +14,8 @@
     <ClInclude Include="ClientSession.h" />
     <ClInclude Include="ConcurrentQueue.h" />
     <ClInclude Include="ILogger.h" />
+    <ClInclude Include="Package.h" />
     <ClInclude Include="Server.h" />
-    <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientSession.cpp" />

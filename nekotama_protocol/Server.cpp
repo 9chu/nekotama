@@ -1,7 +1,5 @@
 #include "Server.h"
 
-#include <chrono>
-
 using namespace std;
 using namespace nekotama;
 
@@ -86,9 +84,10 @@ void Server::mainThreadLoop()NKNOEXCEPT
 		tReadHandles.insert(m_srvSocket);
 
 		// 进行select
+		bool bBlockSelect = m_mpClients.size() == 0;
 		try
-		{
-			if (m_pFactory->Select(&tReadHandles, &tWriteHandles, &tErrorHandles, m_mpClients.size() == 0 ? (uint32_t)-1 : TIMETICKSTEP))
+		{	
+			if (m_pFactory->Select(&tReadHandles, &tWriteHandles, &tErrorHandles, bBlockSelect ? (uint32_t) - 1 : TIMETICKSTEP))
 			{
 				// 检查可读性
 				for (auto i : tReadHandles)
@@ -169,9 +168,12 @@ void Server::mainThreadLoop()NKNOEXCEPT
 			m_stopFlag = true;
 			break;
 		}
-
+		
 		auto tCur = std::chrono::system_clock::now();
-		uint32_t tTick = (uint32_t)(chrono::duration_cast<chrono::milliseconds>(tCur - tLast).count());
+		chrono::milliseconds tTick = chrono::milliseconds::zero();
+		if (!bBlockSelect)
+			 tTick = chrono::duration_cast<chrono::milliseconds>(tCur - tLast);
+		tLast = tCur;
 
 		// 刷新计数器并检查客户端是否存活
 		for (auto i : m_mpClients)

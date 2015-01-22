@@ -27,7 +27,7 @@
     <ClInclude Include="ILogger.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Version.h">
+    <ClInclude Include="Package.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
