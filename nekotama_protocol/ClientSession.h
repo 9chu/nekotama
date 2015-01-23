@@ -1,6 +1,7 @@
 #pragma once
 #include <deque>
 #include <chrono>
+#include <set>
 
 #include <Bencode.h>
 #include <ISocket.h>
@@ -44,6 +45,7 @@ namespace nekotama
 
 		std::string m_Nickname;
 		std::string m_VirtualAddr;
+		uint16_t m_GamePort;
 
 		// === 计时器部分 ===
 		bool m_bPingSent;
@@ -56,13 +58,20 @@ namespace nekotama
 		SocketHandle GetSocket()NKNOEXCEPT { return m_cltSocket; }
 		const std::string& GetIP()const NKNOEXCEPT { return m_sIP; }
 		uint16_t GetPort()const NKNOEXCEPT { return m_uPort; }
-		bool ShouldBeClosed()const NKNOEXCEPT{ return m_bShouldBeClosed; }
-		bool HasData()const NKNOEXCEPT{ return m_iLastDataNotSent > 0 || !m_dataBuf.empty(); }
+		bool ShouldBeClosed()const NKNOEXCEPT { return m_bShouldBeClosed; }
+		bool HasData()const NKNOEXCEPT { return m_iLastDataNotSent > 0 || !m_dataBuf.empty(); }
+
+		const std::string& GetNickname()const NKNOEXCEPT { return m_Nickname; }
+		const std::string& GetVirtualAddr()const NKNOEXCEPT { return m_VirtualAddr; }
+		uint16_t GetGamePort()const NKNOEXCEPT { return m_GamePort; }
+
+		void ForwardingPackage(const std::string& source_addr, uint16_t source_port, uint16_t target_port, const std::string& data);
 	protected:
 		void sendWelcome(const std::string& server_name, uint32_t protocol_maj, uint32_t protocol_min);
 		void sendKicked(KickReason reason);
 		void sendLoginConfirm(const std::string& nick, const std::string& addr, uint16_t port);
 		void sendPing();
+		void sendGameInfo(const std::set<ClientSession*>& games);
 	protected:
 		void push(const Bencode::Value& v);  // 填报文
 		void poll(const Bencode::Value& v);  // 处理报文

@@ -50,8 +50,16 @@ namespace nekotama
 		virtual void OnClientArrival(ClientSession* client, bool kicked_for_full)NKNOEXCEPT {}
 		virtual void OnClientLeave(ClientSession* client)NKNOEXCEPT {}
 		virtual void OnClientInvalid(ClientSession* client)NKNOEXCEPT {}
-		virtual bool OnClientLogin(ClientSession* client, std::string& nick, std::string& addr, uint16_t port)NKNOEXCEPT { return false; }
+		virtual bool OnClientLogin(ClientSession* client, std::string& nick, std::string& addr, uint16_t& port)NKNOEXCEPT { return false; }
 		virtual void OnClientLogout(ClientSession* client)NKNOEXCEPT {}
+		virtual void OnClientPackageReceived(ClientSession* client, const std::string& target, uint16_t target_port, uint16_t source_port, const std::string& data)NKNOEXCEPT{}
+		virtual void OnClientHostCreated(ClientSession* client)NKNOEXCEPT {}
+		virtual void OnClientHostDestroyed(ClientSession* client)NKNOEXCEPT {}
+		virtual const std::set<ClientSession*>& OnClientQueryGames(ClientSession* client)NKNOEXCEPT
+		{
+			static std::set<ClientSession*> s_Empty;
+			return s_Empty;
+		}
 	private:
 		Server& operator=(const Server&);
 		Server(const Server&);

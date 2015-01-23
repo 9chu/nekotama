@@ -52,6 +52,20 @@ ClientSession::~ClientSession()
 	m_pLogger->Log(StringFormat("已断开到客户端的连接。(%s:%u)", m_sIP.c_str(), m_uPort));
 }
 
+void ClientSession::ForwardingPackage(const std::string& source_addr, uint16_t source_port, uint16_t target_port, const std::string& data)
+{
+	if (m_iState == ClientSessionState::Logined)
+	{
+		Value tPackage(ValueType::Dictionary);
+		tPackage.VDict["type"] = make_shared<Value>((IntType)PackageType::RecvPackage);
+		tPackage.VDict["source"] = make_shared<Value>(source_addr);
+		tPackage.VDict["sport"] = make_shared<Value>((IntType)source_port);
+		tPackage.VDict["tport"] = make_shared<Value>((IntType)target_port);
+		tPackage.VDict["data"] = make_shared<Value>((StringType)data);
+		push(tPackage);
+	}
+}
+
 void ClientSession::sendWelcome(const std::string& server_name, uint32_t protocol_maj, uint32_t protocol_min)
 {
 	Value tPackage(ValueType::Dictionary);
@@ -84,6 +98,25 @@ void ClientSession::sendPing()
 {
 	Value tPackage(ValueType::Dictionary);
 	tPackage.VDict["type"] = make_shared<Value>((IntType)PackageType::Ping);
+	tPackage.VDict["delay"] = make_shared<Value>((IntType)m_iDelay.count());
+	push(tPackage);
+}
+
+void ClientSession::sendGameInfo(const std::set<ClientSession*>& games)
+{
+	Value tPackage(ValueType::Dictionary);
+	tPackage.VDict["type"] = make_shared<Value>((IntType)PackageType::GameInfo);
+	Value tGameList(ValueType::List);
+	for (auto i : games)
+	{
+		Value tGame(ValueType::Dictionary);
+		tGame.VDict["nick"] = make_shared<Value>((StringType)m_Nickname);
+		tGame.VDict["target"] = make_shared<Value>((StringType)m_VirtualAddr);
+		tGame.VDict["port"] = make_shared<Value>((IntType)m_GamePort);
+		tGame.VDict["delay"] = make_shared<Value>((IntType)m_iDelay.count());
+		tGameList.VList.emplace_back(make_shared<Value>(std::move(tGame)));
+	}
+	tPackage.VDict["hosts"] = make_shared<Value>(std::move(tGameList));
 	push(tPackage);
 }
 
@@ -115,6 +148,7 @@ void ClientSession::poll(const Bencode::Value& v)
 			{
 				m_Nickname = tNickname;
 				m_VirtualAddr = tAddr;
+				m_GamePort = tPort;
 				
 				sendLoginConfirm(tNickname, tAddr, tPort);  // 登陆成功
 				m_iState = ClientSessionState::Logined;
@@ -148,6 +182,37 @@ void ClientSession::poll(const Bencode::Value& v)
 		m_bShouldBeClosed = true;
 		m_pLogger->Log(StringFormat("客户端登出，昵称: %s，虚拟ip: %s。(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
 		m_pServer->OnClientLogout(this);
+		break;
+	case PackageType::SendPackage:
+		if (m_iState == ClientSessionState::Logined)
+		{
+			const string& tTarget = PackageHelper::GetPackageField<const string&>(v, "target");
+			int tTargetPort = PackageHelper::GetPackageField<int>(v, "tport");
+			int tSourcePort = PackageHelper::GetPackageField<int>(v, "port");
+			const string& tData = PackageHelper::GetPackageField<const string&>(v, "data");
+			m_pServer->OnClientPackageReceived(this, tTarget, tTargetPort, tSourcePort, tData);
+		}
+		break;
+	case PackageType::CreateHost:
+		if (m_iState == ClientSessionState::Logined)
+		{
+			m_pLogger->Log(StringFormat("客户端创建游戏，昵称: %s，虚拟ip: %s。(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
+			m_pServer->OnClientHostCreated(this);
+		}	
+		break;
+	case PackageType::DestroyHost:
+		if (m_iState == ClientSessionState::Logined)
+		{
+			m_pLogger->Log(StringFormat("客户端关闭游戏，昵称: %s，虚拟ip: %s。(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
+			m_pServer->OnClientHostDestroyed(this);
+		}	
+		break;
+	case PackageType::QueryGame:
+		if (m_iState == ClientSessionState::Logined)
+		{
+			auto tResults = m_pServer->OnClientQueryGames(this);
+			sendGameInfo(tResults);
+		}
 		break;
 	default:
 		throw logic_error("unexpected package type.");

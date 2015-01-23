@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+#include <Util.h>
+
 namespace nekotama
 {
 	enum class LogType

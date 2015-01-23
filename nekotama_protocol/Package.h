@@ -25,8 +25,29 @@ namespace nekotama
 				addr        从服务端获得的虚拟ip地址
 				port        游戏端口，用于建立房间
 			5. PING
+				delay       上一次延时
 			6. PONG
 			7. 登出
+
+			8. 客户端->服务端数据包
+				target      目标ip
+				tport       目标端口
+				sport       源端口
+				data        数据
+			9. 服务端->客户端数据包
+				source      源ip
+				sport       源端口
+				tport       目标端口
+				data        数据
+			10. 房间建立
+			11. 房间撤销
+			12. 查询房间信息
+			13. 房间信息反馈
+				hosts       房间列表
+					nick    昵称
+					target  目标ip
+					port    目标端口
+					delay   延迟
 	*/
 
 	/// @brief 数据包类型
@@ -38,7 +59,13 @@ namespace nekotama
 		LoginConfirm = 4,
 		Ping = 5,
 		Pong = 6,
-		Logout = 7
+		Logout = 7,
+		SendPackage = 8,
+		RecvPackage = 9,
+		CreateHost = 10,
+		DestroyHost = 11,
+		QueryGame = 12,
+		GameInfo = 13
 	};
 
 	/// @brief 客户端会话踢出原因

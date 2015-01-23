@@ -21,9 +21,27 @@
     <ClCompile Include="ConsoleColor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="StdOutLogger.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerImplement.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="VirtualIpPool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleColor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StdOutLogger.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerImplement.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="VirtualIpPool.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

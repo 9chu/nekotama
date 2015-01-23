@@ -11,7 +11,7 @@ using namespace Bencode;
 
 Client::Client(ISocketFactory* pFactory, ILogger* pLogger, const std::string& serverip, const std::string& nickname, uint16_t port)
 	: m_pFactory(pFactory), m_pLogger(pLogger), m_sIP(serverip), m_iPort(port), m_sNickname(nickname),
-	m_stopFlag(false), m_bRunning(false)
+	m_stopFlag(false), m_bRunning(false), m_iGamePort(0), m_iDelay(0)
 {
 	// 初始化Socket
 	m_pSocket = pFactory->Create(SocketType::TCP);
@@ -59,6 +59,38 @@ void Client::GentlyStop()
 	}
 }
 
+void Client::NotifyGameCreated()
+{
+	Value tPackage(ValueType::Dictionary);
+	tPackage.VDict["type"] = make_shared<Bencode::Value>((IntType)PackageType::CreateHost);
+	m_sendQueue.Push(tPackage);
+}
+
+void Client::NotifyGameDestroyed()
+{
+	Value tPackage(ValueType::Dictionary);
+	tPackage.VDict["type"] = make_shared<Bencode::Value>((IntType)PackageType::DestroyHost);
+	m_sendQueue.Push(tPackage);
+}
+
+void Client::QueryGameInfo()
+{
+	Value tPackage(ValueType::Dictionary);
+	tPackage.VDict["type"] = make_shared<Bencode::Value>((IntType)PackageType::QueryGame);
+	m_sendQueue.Push(tPackage);
+}
+
+void Client::ForwardingPackage(const std::string& target_addr, uint16_t target_port, uint16_t source_port, const std::string& data)
+{
+	Value tPackage(ValueType::Dictionary);
+	tPackage.VDict["type"] = make_shared<Value>((IntType)PackageType::RecvPackage);
+	tPackage.VDict["target"] = make_shared<Value>(target_addr);
+	tPackage.VDict["tport"] = make_shared<Value>((IntType)target_port);
+	tPackage.VDict["sport"] = make_shared<Value>((IntType)source_port);
+	tPackage.VDict["data"] = make_shared<Value>((StringType)data);
+	m_sendQueue.Push(tPackage);
+}
+
 bool Client::poll(const Bencode::Value& v)
 {
 	PackageType tPakType = (PackageType)PackageHelper::GetPackageField<int>(v, "type");
@@ -93,9 +125,38 @@ bool Client::poll(const Bencode::Value& v)
 	case PackageType::Ping:
 		// 发送pong数据包
 		{
+			m_iDelay = PackageHelper::GetPackageField<int>(v, "delay");
+
 			Value tPackage(ValueType::Dictionary);
 			tPackage.VDict["type"] = make_shared<Bencode::Value>((IntType)PackageType::Pong);
 			m_sendQueue.Push(tPackage);
+		}
+		break;
+	case PackageType::RecvPackage:
+		{
+			const string& tSource = PackageHelper::GetPackageField<const string&>(v, "source");
+			int tSourcePort = PackageHelper::GetPackageField<int>(v, "sport");
+			int tTargetPort = PackageHelper::GetPackageField<int>(v, "tport");
+			const string& tData = PackageHelper::GetPackageField<const string&>(v, "data");
+			OnDataArrival(tSource, tSourcePort, tTargetPort, tData);
+		}
+		break;
+	case PackageType::GameInfo:
+		{
+			auto i = v.VDict.find("hosts");
+			if (i == v.VDict.end() || i->second->Type != ValueType::List)
+				throw logic_error("invalid package data.");
+			vector<GameInfo> tGameInfoList;
+			for (auto j : i->second->VList)
+			{
+				GameInfo tInfo;
+				tInfo.Nickname = PackageHelper::GetPackageField<const string&>(*j, "nick");
+				tInfo.VirtualAddr = PackageHelper::GetPackageField<const string&>(*j, "target");
+				tInfo.VirtualPort = PackageHelper::GetPackageField<int>(*j, "port");
+				tInfo.Delay = PackageHelper::GetPackageField<int>(*j, "delay");
+				tGameInfoList.push_back(tInfo);
+			}
+			OnRefreshGameInfo(tGameInfoList);
 		}
 		break;
 	}
@@ -127,8 +188,19 @@ void Client::mainThreadLoop()NKNOEXCEPT
 	// 启动主循环
 	Decoder tDecoder;
 	SocketHandleSet tReadTestSet;
-	while (!m_stopFlag && !m_pSocket->TestIfClosed())
+	while (!m_stopFlag)
 	{
+		try
+		{
+			if (m_pSocket->TestIfClosed())
+				break;
+		}
+		catch (const std::exception& e)
+		{
+			m_pLogger->Log(StringFormat("测试连接是否可用时错误。(%s)", e.what()), LogType::Error);
+			break;
+		}
+
 		tReadTestSet.clear();
 		tReadTestSet.insert(m_pSocket);
 		if (m_pFactory->Select(&tReadTestSet, nullptr, nullptr, TIMETICKSTEP))
