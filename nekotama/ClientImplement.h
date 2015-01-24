@@ -1,7 +1,11 @@
 #pragma once
+#include <mutex>
+#include <unordered_map>
+
 #include <Client.h>
 
 #include "ClientRenderer.h"
+#include "VirtualUDPConnection.h"
 
 namespace nekotama
 {
@@ -11,6 +15,13 @@ namespace nekotama
 	{
 	private:
 		std::shared_ptr<ClientRenderer> m_ClientRenderer;
+
+		std::mutex m_ConnectionMutex;
+		std::unordered_map<uint16_t, VirtualUDPConnection*> m_pConnections;
+	public:
+		bool RegisterConnection(uint16_t port, VirtualUDPConnection* p);
+		void UnregisterConnection(uint16_t port);
+		uint16_t AllocFreePort();
 	public:
 		void OnConnectFailed()NKNOEXCEPT;
 		void OnNotSupportedServerVersion()NKNOEXCEPT;

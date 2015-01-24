@@ -188,7 +188,7 @@ void ClientSession::poll(const Bencode::Value& v)
 		{
 			const string& tTarget = PackageHelper::GetPackageField<const string&>(v, "target");
 			int tTargetPort = PackageHelper::GetPackageField<int>(v, "tport");
-			int tSourcePort = PackageHelper::GetPackageField<int>(v, "port");
+			int tSourcePort = PackageHelper::GetPackageField<int>(v, "sport");
 			const string& tData = PackageHelper::GetPackageField<const string&>(v, "data");
 			m_pServer->OnClientPackageReceived(this, tTarget, tTargetPort, tSourcePort, tData);
 		}

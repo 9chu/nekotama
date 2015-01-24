@@ -72,6 +72,26 @@ void ClientRenderer::SetDelay(uint32_t iDelay)
 	m_iDelay = iDelay;
 }
 
+void ClientRenderer::DoDeviceLost()
+{
+	if (m_pFPSFont)
+		m_pFPSFont->OnLostDevice();
+	if (m_pHintFont)
+		m_pHintFont->OnLostDevice();
+	if (m_pHintSprite)
+		m_pHintSprite->OnLostDevice();
+}
+
+void ClientRenderer::DoDeviceReset()
+{
+	if (m_pFPSFont)
+		m_pFPSFont->OnResetDevice();
+	if (m_pHintFont)
+		m_pHintFont->OnResetDevice();
+	if (m_pHintSprite)
+		m_pHintSprite->OnResetDevice();
+}
+
 void ClientRenderer::Render()
 {
 	// 计算流逝时间

@@ -95,7 +95,7 @@ void Client::QueryGameInfo()
 void Client::ForwardingPackage(const std::string& target_addr, uint16_t target_port, uint16_t source_port, const std::string& data)
 {
 	Value tPackage(ValueType::Dictionary);
-	tPackage.VDict["type"] = make_shared<Value>((IntType)PackageType::RecvPackage);
+	tPackage.VDict["type"] = make_shared<Value>((IntType)PackageType::SendPackage);
 	tPackage.VDict["target"] = make_shared<Value>(target_addr);
 	tPackage.VDict["tport"] = make_shared<Value>((IntType)target_port);
 	tPackage.VDict["sport"] = make_shared<Value>((IntType)source_port);

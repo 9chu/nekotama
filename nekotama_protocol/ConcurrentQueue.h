@@ -60,5 +60,14 @@ namespace nekotama
 			data = m_Queue.front();
 			m_Queue.pop();
 		}
+		void Peek(T& data)
+		{
+			std::unique_lock<std::mutex> lock(m_Mutex);
+			while (m_Queue.empty())
+			{
+				m_CV.wait(lock);
+			}
+			data = m_Queue.front();
+		}
 	};
 }

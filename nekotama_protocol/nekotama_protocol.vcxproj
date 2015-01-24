@@ -17,11 +17,13 @@
     <ClInclude Include="ILogger.h" />
     <ClInclude Include="Package.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="VirtualIpPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClientSession.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="VirtualIpPool.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B6EB23A5-BA00-430D-BDFA-970DC3E4282E}</ProjectGuid>
@@ -67,7 +69,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
     </ClCompile>
@@ -84,7 +86,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>

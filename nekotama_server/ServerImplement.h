@@ -1,8 +1,8 @@
 #pragma once
 #include <Server.h>
+#include <VirtualIpPool.h>
 
 #include "StdOutLogger.h"
-#include "VirtualIpPool.h"
 
 namespace nekotama
 {

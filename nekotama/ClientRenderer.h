@@ -44,6 +44,9 @@ namespace nekotama
 	public:
 		void ShowHint(const std::wstring& text);
 		void SetDelay(uint32_t iDelay = (uint32_t)-1);
+		
+		void DoDeviceLost();
+		void DoDeviceReset();
 
 		void Render();
 	public:

@@ -1,5 +1,7 @@
 #pragma once
 #include <functional>
+#include <memory>
+
 #include "APIHooker.h"
 
 namespace nekotama
@@ -25,6 +27,6 @@ namespace nekotama
 
 	// HOOK¹Ò¹³º¯Êý
 	void SocketHook(APIHooker& target);
-	void SetCallback_Socket(const std::function<SOCKET(int, int, int, ISocketHooker*&)>& Callback);
+	void SetCallback_Socket(const std::function<SOCKET(int, int, int, std::shared_ptr<ISocketHooker>&)>& Callback);
 	void SetCallback_GetHostByName(const std::function<struct hostent*(const char*)>& Callback);
 }

@@ -106,6 +106,7 @@
     <ClInclude Include="HookUtil.h" />
     <ClInclude Include="NonOutputLogger.h" />
     <ClInclude Include="SocketHook.h" />
+    <ClInclude Include="VirtualUDPConnection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="APIHooker.cpp" />
@@ -118,6 +119,7 @@
     <ClCompile Include="HookedSocket.cpp" />
     <ClCompile Include="HookUtil.cpp" />
     <ClCompile Include="SocketHook.cpp" />
+    <ClCompile Include="VirtualUDPConnection.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,6 @@
 #include "SocketHook.h"
 #include <unordered_map>
+#include <memory>
 
 using namespace nekotama;
 
@@ -85,10 +86,10 @@ struct HookTable
 	PROC* RawFunc;
 };
 
-static std::unordered_map<SOCKET, ISocketHooker*> callbackTable;
+static std::unordered_map<SOCKET, std::shared_ptr<ISocketHooker>> callbackTable;
 static CRITICAL_SECTION lockSection;
 static bool socketHooked = false;
-static std::function<SOCKET(int, int, int, ISocketHooker*&)> callback_socket;
+static std::function<SOCKET(int, int, int, std::shared_ptr<ISocketHooker>&)> callback_socket;
 static std::function<struct hostent*(const char*)> callback_gethostbyname;
 
 static HookTable socketHookTable[] = {
@@ -112,7 +113,7 @@ static ISocketHooker* GetHooker(SOCKET s)
 	}
 	else
 	{
-		ISocketHooker* p = i->second;
+		ISocketHooker* p = i->second.get();
 		LeaveCriticalSection(&lockSection);
 		return p;
 	}
@@ -131,7 +132,7 @@ static void RemoveHooker(SOCKET s)
 	}
 }
 
-static void SetHooker(SOCKET s, ISocketHooker* pHooker)
+static void SetHooker(SOCKET s, const std::shared_ptr<ISocketHooker>& pHooker)
 {
 	EnterCriticalSection(&lockSection);
 	callbackTable[s] = pHooker;
@@ -151,7 +152,7 @@ void nekotama::SocketHook(APIHooker& target)
 	}
 }
 
-void nekotama::SetCallback_Socket(const std::function<SOCKET(int af, int type, int protocol, ISocketHooker*& listener)>& Callback)
+void nekotama::SetCallback_Socket(const std::function<SOCKET(int af, int type, int protocol, std::shared_ptr<ISocketHooker>& listener)>& Callback)
 {
 	callback_socket = Callback;
 }
@@ -216,7 +217,7 @@ static SOCKET WINAPI hook_socket(int af, int type, int protocol)
 {
 	if (callback_socket)
 	{
-		ISocketHooker* p = NULL;
+		std::shared_ptr<ISocketHooker> p = NULL;
 		SOCKET ret = callback_socket(af, type, protocol, p);
 		if (p)
 			SetHooker(ret, p);
