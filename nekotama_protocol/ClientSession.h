@@ -64,6 +64,7 @@ namespace nekotama
 		const std::string& GetNickname()const NKNOEXCEPT { return m_Nickname; }
 		const std::string& GetVirtualAddr()const NKNOEXCEPT { return m_VirtualAddr; }
 		uint16_t GetGamePort()const NKNOEXCEPT { return m_GamePort; }
+		std::chrono::milliseconds GetDelay()const NKNOEXCEPT { return m_iDelay; }
 
 		void ForwardingPackage(const std::string& source_addr, uint16_t source_port, uint16_t target_port, const std::string& data);
 	protected:

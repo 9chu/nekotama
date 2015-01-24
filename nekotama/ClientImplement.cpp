@@ -19,8 +19,10 @@ bool ClientImplement::RegisterConnection(uint16_t port, VirtualUDPConnection* p)
 		return false;
 	m_pConnections[port] = p;
 	if (port == GetGamePort())
+	{
 		NotifyGameCreated();
-	m_ClientRenderer->ShowHint(L"连接建立");
+		m_ClientRenderer->ShowHint(L"游戏房间已建立\n\n按TAB查询房间");
+	}
 	return true;
 }
 
@@ -32,9 +34,11 @@ void ClientImplement::UnregisterConnection(uint16_t port)NKNOEXCEPT
 	if (i != m_pConnections.end())
 	{
 		if (port == GetGamePort())
+		{
 			NotifyGameDestroyed();
+			m_ClientRenderer->ShowHint(L"游戏房间已关闭");
+		}
 		m_pConnections.erase(i);
-		m_ClientRenderer->ShowHint(L"连接关闭");
 	}	
 }
 
@@ -108,7 +112,7 @@ void ClientImplement::OnDataArrival(const std::string& source_ip, uint16_t sourc
 
 void ClientImplement::OnRefreshGameInfo(const std::vector<GameInfo>& info)NKNOEXCEPT
 {
-	/// !TODO
+	m_ClientRenderer->SetGameInfo(info);
 }
 
 void ClientImplement::OnDelayRefreshed()NKNOEXCEPT

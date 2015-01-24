@@ -21,7 +21,22 @@ static LRESULT(CALLBACK *raw_WindowProc)(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 
 LRESULT CALLBACK hook_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (uMsg == WM_CLOSE || uMsg == WM_DESTROY || (uMsg == WM_SHOWWINDOW && wParam == FALSE))
+	if (uMsg == WM_KEYDOWN)
+	{
+		if (wParam == VK_TAB && g_ClientImplement && g_ClientRenderer &&
+			g_ClientRenderer->IsGameInfoListVisible() == false)
+		{
+			g_ClientImplement->QueryGameInfo();
+			g_ClientRenderer->ShowGameInfoList();
+		}
+	}
+	else if (uMsg == WM_KEYUP)
+	{
+		if (wParam == VK_TAB && g_ClientImplement && g_ClientRenderer &&
+			g_ClientRenderer->IsGameInfoListVisible() == true)
+			g_ClientRenderer->HideGameInfoList();
+	}
+	else if (uMsg == WM_CLOSE || uMsg == WM_DESTROY || (uMsg == WM_SHOWWINDOW && wParam == FALSE))
 	{
 		if (g_ClientImplement)  // 释放客户端实现部分
 		{
@@ -44,13 +59,17 @@ static HRESULT(WINAPI *raw_IDirect3D9_CreateDevice)(IDirect3D9* pThis, UINT Adap
 
 static HRESULT WINAPI hook_IDirect3DDevice9_Reset(IDirect3DDevice9* pThis, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
-	g_ClientRenderer->DoDeviceLost();
+	if (g_ClientRenderer)
+		g_ClientRenderer->DoDeviceLost();
 
 	// 执行原始函数
 	HRESULT tRet = raw_IDirect3DDevice9_Reset(pThis, pPresentationParameters);
 
 	if (SUCCEEDED(tRet))
-		g_ClientRenderer->DoDeviceReset();
+	{
+		if (g_ClientRenderer)
+			g_ClientRenderer->DoDeviceReset();
+	}	
 	return tRet;
 }
 
@@ -71,7 +90,10 @@ static HRESULT WINAPI hook_IDirect3DSwapChain9_Present(IDirect3DSwapChain9* pThi
 	pDev->Release();
 
 	if (tRet == D3DERR_DEVICELOST)
-		g_ClientRenderer->DoDeviceLost();
+	{
+		if (g_ClientRenderer)
+			g_ClientRenderer->DoDeviceLost();
+	}	
 	return tRet;
 }
 
@@ -96,7 +118,10 @@ static HRESULT WINAPI hook_IDirect3DDevice9_Present(IDirect3DDevice9* pThis, CON
 	HRESULT tRet = raw_IDirect3DDevice9_Present(pThis, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
 
 	if (tRet == D3DERR_DEVICELOST)
-		g_ClientRenderer->DoDeviceLost();
+	{
+		if (g_ClientRenderer)
+			g_ClientRenderer->DoDeviceLost();
+	}
 
 	// 检查虚表改动
 	if (ComHooker::GetFuncPtr(pThis, 17) != hook_IDirect3DDevice9_Present)
@@ -193,108 +218,3 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	}
 	return (TRUE);
 }
-
-
-/*
-HANDLE g_ConsoleOutput;
-
-void OutDbg(const std::string& str)
-{
-	WriteConsoleA(g_ConsoleOutput, str.c_str(), str.length(), NULL, NULL);
-}
-
-class TestListener :
-	public ISocketHooker
-{
-public:
-	int Bind(SOCKET s, const struct sockaddr* addr, int namelen)
-	{
-		string ip = inet_ntoa(((sockaddr_in*)addr)->sin_addr);
-		int16_t port = ntohs(((sockaddr_in*)addr)->sin_port);
-
-		char buf[512];
-		sprintf(buf, "[Socket:%x] Bind 于 %s:%u namelen=%d\n", s, ip.c_str(), port, namelen);
-		OutDbg(buf);
-		return ISocketHooker::Bind(s, addr, namelen);
-	}
-	int RecvFrom(SOCKET s, char* buf, int len, int flags, struct sockaddr* from, int* fromlen)
-	{
-		string ip = inet_ntoa(((sockaddr_in*)from)->sin_addr);
-		uint16_t port = ntohs(((sockaddr_in*)from)->sin_port);
-
-		int datalen = fromlen ? *fromlen : 0;
-		int ret = ISocketHooker::RecvFrom(s, buf, len, flags, from, &datalen);
-		stringstream ss;
-		if (datalen > 0)
-		{
-			char pbuf[512];
-			sprintf(pbuf, "[Socket:%x] RecvFrom 于 %s:%u len=%d fromlen=%d\n", s, ip.c_str(), port, len, datalen);
-			OutDbg(pbuf);
-		}
-		if (fromlen)
-			*fromlen = datalen;
-		return ret;
-	}
-	int SendTo(SOCKET s, const char* buf, int len, int flags, const struct sockaddr* to, int tolen)
-	{
-		string ip = inet_ntoa(((sockaddr_in*)to)->sin_addr);
-		uint16_t port = ntohs(((sockaddr_in*)to)->sin_port);
-
-		char pbuf[512];
-		sprintf(pbuf, "[Socket:%x] SendTo 于 %s:%u len=%d tolen=%d\n", s, ip.c_str(), port, len, tolen);
-		OutDbg(pbuf);
-		return ISocketHooker::SendTo(s, buf, len, flags, to, tolen);
-	}
-};
-
-TestListener g_test;
-
-std::shared_ptr<HookRenderer> g_renderer;
-
-static HRESULT(WINAPI *raw_Present)(IDirect3DDevice9* pThis, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
-
-static HRESULT(WINAPI *raw_CreateDevice)(IDirect3D9* pThis, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface);
-
-
-
-BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-{
-	switch (ul_reason_for_call)
-	{
-	case DLL_PROCESS_ATTACH:
-		{
-			APIHooker mainModule;
-			SocketHook(mainModule);
-			SetCallback_Socket([](int af, int type, int protocol , ISocketHooker*& listener) -> SOCKET {
-				listener = &g_test;
-				return Socket_Socket(af, type, protocol);
-			});
-
-			// DXHook
-			Dx9Hook(mainModule);
-			SetCallback_Direct3DCreate9([](UINT SDKVersion) -> IDirect3D9* {
-				IDirect3D9* ret = Dx9_Direct3DCreate9(SDKVersion);
-				OutDbg("Direct3DCreate9 called.\n");
-				OutDbg("Hooking IDirect3D9::CreateDevice...\n");
-				*(void**)&raw_CreateDevice = ComHooker::HookVptr(ret, 16, hook_CreateDevice);  // IDirect3D9::CreateDevice
-				return ret;
-			});
-
-			// 创建控制台
-			AllocConsole();
-			g_ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-						
-			// 恢复主线程
-			ResumeMainThread();
-		}
-		break;
-	case DLL_PROCESS_DETACH:
-		break;
-	case DLL_THREAD_ATTACH:
-		break;
-	case DLL_THREAD_DETACH:
-		break;
-	}
-	return (TRUE);
-}
-*/

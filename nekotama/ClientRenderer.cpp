@@ -1,5 +1,7 @@
 #include "ClientRenderer.h"
 
+#include "Encoding.h"
+
 #define HINTWIDTH       200.f
 #define HINTHEIGHT      80.f
 #define HINTOFFSETX     0.f
@@ -9,6 +11,14 @@
 #define HINTTEXTOFFSETX 20.f
 #define HINTTEXTOFFSETY 30.f
 
+#define GAMEINFOTOP            88.f
+#define GAMEINFOHEIGHT         15.f
+#define GAMEINFOLEFT           32.f
+#define GAMEINFOWIDTH_NICKNAME 150.f
+#define GAMEINFOWIDTH_IP       105.f
+#define GAMEINFOWIDTH_PORT     50.f
+#define GAMEINFOWIDTH_DELAY    40.f
+
 using namespace std;
 using namespace nekotama;
 
@@ -17,7 +27,8 @@ static chrono::microseconds HINT_MOVEOUT = chrono::duration_cast<chrono::microse
 static chrono::microseconds HINT_SHOWTIME = chrono::duration_cast<chrono::microseconds>(chrono::milliseconds(3000));
 
 ClientRenderer::ClientRenderer(const std::wstring& resDir, IDirect3DDevice9* pDev)
-	: m_pDev(pDev), m_ResDir(resDir), m_cFPS(0), m_cFrameCounter(0), m_pFPSFont(NULL), m_iDelay((uint32_t)-1)
+	: m_pDev(pDev), m_ResDir(resDir), m_cFPS(0), m_cFrameCounter(0), m_pFPSFont(NULL), m_iDelay((uint32_t)-1),
+	m_bGameInfoListVisible(false)
 {
 	// 创建字体
 	D3DXCreateFont(m_pDev, 16, 0, 1, D3DX_DEFAULT, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, 0, L"Times New Roman", &m_pFPSFont);
@@ -39,17 +50,34 @@ ClientRenderer::ClientRenderer(const std::wstring& resDir, IDirect3DDevice9* pDe
 		NULL,
 		NULL,
 		&m_pHintBackground);
+	D3DXIMAGE_INFO tGameInfoListImgInfo;
+	D3DXCreateTextureFromFileEx(
+		m_pDev,
+		(m_ResDir + L"\\GameList.png").c_str(),
+		D3DX_DEFAULT_NONPOW2,
+		D3DX_DEFAULT_NONPOW2,
+		D3DX_DEFAULT,
+		0,
+		D3DFMT_A8R8G8B8,
+		D3DPOOL_MANAGED,
+		D3DX_FILTER_TRIANGLE | D3DX_FILTER_DITHER,
+		D3DX_FILTER_TRIANGLE | D3DX_FILTER_DITHER,
+		0,
+		&tGameInfoListImgInfo,
+		NULL,
+		&m_pGameInfoListBackground);
+	m_iGameInfoListBackgroundWidth = tGameInfoListImgInfo.Width;
+	m_iGameInfoListBackgroundHeight = tGameInfoListImgInfo.Height;
 
 	// 创建精灵
-	D3DXCreateSprite(m_pDev, &m_pHintSprite);
+	D3DXCreateSprite(m_pDev, &m_pMainSprite);
 
 	// 初始化计数器
 	m_cLastTimePoint = chrono::high_resolution_clock::now();
 }
 
 ClientRenderer::~ClientRenderer()
-{
-}
+{}
 
 void ClientRenderer::ShowHint(const std::wstring& text)
 {
@@ -67,9 +95,42 @@ void ClientRenderer::ShowHint(const std::wstring& text)
 	m_HintList.emplace(i, tLastIndex, text);
 }
 
+void ClientRenderer::SetGameInfo(const std::vector<Client::GameInfo>& info)
+{
+	unique_lock<mutex> tLock(m_GameInfoListMutex);
+
+	m_GameInfoList.clear();
+	for (auto i : info)
+	{
+		GameInfoDisplay t;
+		t.Delay = i.Delay;
+		t.VirtualPort = i.VirtualPort;
+		t.Nickname = MultiByteToWideChar(i.Nickname);
+		t.VirtualAddr = MultiByteToWideChar(i.VirtualAddr);
+		m_GameInfoList.emplace_back(move(t));
+	}
+}
+
 void ClientRenderer::SetDelay(uint32_t iDelay)
 {
+	unique_lock<mutex> tLock(m_GameInfoListMutex);
+
 	m_iDelay = iDelay;
+}
+
+bool ClientRenderer::IsGameInfoListVisible()
+{
+	return m_bGameInfoListVisible;
+}
+
+void ClientRenderer::HideGameInfoList()
+{
+	m_bGameInfoListVisible = false;
+}
+
+void ClientRenderer::ShowGameInfoList()
+{
+	m_bGameInfoListVisible = true;
 }
 
 void ClientRenderer::DoDeviceLost()
@@ -78,8 +139,8 @@ void ClientRenderer::DoDeviceLost()
 		m_pFPSFont->OnLostDevice();
 	if (m_pHintFont)
 		m_pHintFont->OnLostDevice();
-	if (m_pHintSprite)
-		m_pHintSprite->OnLostDevice();
+	if (m_pMainSprite)
+		m_pMainSprite->OnLostDevice();
 }
 
 void ClientRenderer::DoDeviceReset()
@@ -88,8 +149,8 @@ void ClientRenderer::DoDeviceReset()
 		m_pFPSFont->OnResetDevice();
 	if (m_pHintFont)
 		m_pHintFont->OnResetDevice();
-	if (m_pHintSprite)
-		m_pHintSprite->OnResetDevice();
+	if (m_pMainSprite)
+		m_pMainSprite->OnResetDevice();
 }
 
 void ClientRenderer::Render()
@@ -149,7 +210,7 @@ void ClientRenderer::Render()
 	m_pDev->BeginScene();
 	
 	// 绘制所有的提示文本
-	if (m_pHintSprite && m_pHintBackground && m_pHintFont)
+	if (m_pMainSprite && m_pHintBackground && m_pHintFont)
 	{
 		for (auto i = m_HintList.begin(); i != m_HintList.end(); ++i)
 		{
@@ -189,9 +250,9 @@ void ClientRenderer::Render()
 				break;
 			}
 
-			m_pHintSprite->Begin(0);
-			m_pHintSprite->Draw(m_pHintBackground, NULL, &D3DXVECTOR3(0, 0, 0), &tPos, 0xFFFFFFFF);
-			m_pHintSprite->End();
+			m_pMainSprite->Begin(0);
+			m_pMainSprite->Draw(m_pHintBackground, NULL, &D3DXVECTOR3(0, 0, 0), &tPos, 0xFFFFFFFF);
+			m_pMainSprite->End();
 
 			// 绘制文本
 			RECT tDrawPos;
@@ -200,6 +261,46 @@ void ClientRenderer::Render()
 			tDrawPos.right = (LONG)(tDrawPos.left + HINTTEXTWIDTH);
 			tDrawPos.bottom = (LONG)(tDrawPos.top + HINTTEXTHEIGHT);
 			m_pHintFont->DrawTextW(NULL, i->Text.c_str(), -1, &tDrawPos, DT_LEFT | DT_TOP, D3DCOLOR_ARGB(250, 210, 210, 210));
+		}
+	}
+
+	// 绘制游戏列表
+	if (m_bGameInfoListVisible && m_pHintFont && m_pMainSprite && m_pGameInfoListBackground)
+	{
+		unique_lock<mutex> tLock(m_GameInfoListMutex);
+
+		// 计算绘制位置
+		D3DXVECTOR3 tPos;
+		tPos.x = tViewPort.Width / 2.f - m_iGameInfoListBackgroundWidth / 2.f;
+		tPos.y = tViewPort.Height / 2.f - m_iGameInfoListBackgroundHeight / 2.f;
+		tPos.z = 0.f;
+
+		m_pMainSprite->Begin(0);
+		m_pMainSprite->Draw(m_pGameInfoListBackground, NULL, &D3DXVECTOR3(0, 0, 0), &tPos, 0xFFFFFFFF);
+		m_pMainSprite->End();
+
+		for (size_t i = 0; i < m_GameInfoList.size(); ++i)
+		{
+			wchar_t tBuf[64];
+			RECT tDrawPos;
+			tDrawPos.top = (LONG)(tPos.y + GAMEINFOTOP + i * GAMEINFOHEIGHT);
+			tDrawPos.bottom = (LONG)(tPos.y + GAMEINFOTOP + (i + 1) * GAMEINFOHEIGHT);
+			
+			tDrawPos.left = (LONG)(tPos.x + GAMEINFOLEFT);
+			tDrawPos.right = (LONG)(tDrawPos.left + GAMEINFOWIDTH_NICKNAME);
+			m_pHintFont->DrawTextW(NULL, m_GameInfoList[i].Nickname.c_str(), -1, &tDrawPos, DT_LEFT, 0xFDFFFFFF);
+
+			tDrawPos.left = (LONG)(tDrawPos.right);
+			tDrawPos.right = (LONG)(tDrawPos.left + GAMEINFOWIDTH_IP);
+			m_pHintFont->DrawTextW(NULL, m_GameInfoList[i].VirtualAddr.c_str(), -1, &tDrawPos, DT_LEFT, 0xFDFFFFFF);
+
+			tDrawPos.left = (LONG)(tDrawPos.right);
+			tDrawPos.right = (LONG)(tDrawPos.left + GAMEINFOWIDTH_PORT);
+			m_pHintFont->DrawTextW(NULL, _itow(m_GameInfoList[i].VirtualPort, tBuf, 10), -1, &tDrawPos, DT_LEFT, 0xFDFFFFFF);
+
+			tDrawPos.left = (LONG)(tDrawPos.right);
+			tDrawPos.right = (LONG)(tDrawPos.left + GAMEINFOWIDTH_DELAY);
+			m_pHintFont->DrawTextW(NULL, _itow(m_GameInfoList[i].Delay, tBuf, 10), -1, &tDrawPos, DT_LEFT, 0xFDFFFFFF);
 		}
 	}
 	
@@ -216,7 +317,12 @@ void ClientRenderer::Render()
 		tDrawPos.left = 15;
 		tDrawPos.top = 5;
 		tDrawPos.bottom = tDrawPos.top + 20;
-		m_pFPSFont->DrawTextW(NULL, tBuf, -1, &tDrawPos, DT_RIGHT, D3DCOLOR_ARGB(200, 0, 255, 0));
+		m_pFPSFont->DrawTextW(NULL, tBuf, -1, &tDrawPos, DT_RIGHT, D3DCOLOR_ARGB(150, 50, 50, 50));
+		tDrawPos.right -= 1;
+		tDrawPos.left -= 1;
+		tDrawPos.top -= 1;
+		tDrawPos.bottom -= 1;
+		m_pFPSFont->DrawTextW(NULL, tBuf, -1, &tDrawPos, DT_RIGHT, D3DCOLOR_ARGB(250, 0, 200, 0));
 	}
 
 	m_pDev->EndScene();

@@ -10,10 +10,10 @@ using namespace nekotama;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static const chrono::milliseconds sc_RecvTimeout(10000);  // 10√Î ’∑¢—”≥Ÿ
-static const chrono::milliseconds sc_LoginTimeout(5000);  // 5√Îµ«¬Ω—”≥Ÿ
+static const chrono::milliseconds sc_RecvTimeout(20000);  // 20√Î ’∑¢—”≥Ÿ
+static const chrono::milliseconds sc_LoginTimeout(15000);  // 15√Îµ«¬Ω—”≥Ÿ
 static const chrono::milliseconds sc_PingPeriod(3000);  // 3√Î∑¢ÀÕ1ping
-static const chrono::milliseconds sc_PongTimeout(3000);  // 3√Îpong—”≥Ÿ
+static const chrono::milliseconds sc_PongTimeout(5000);  // 5√Îpong—”≥Ÿ
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -110,10 +110,10 @@ void ClientSession::sendGameInfo(const std::set<ClientSession*>& games)
 	for (auto i : games)
 	{
 		Value tGame(ValueType::Dictionary);
-		tGame.VDict["nick"] = make_shared<Value>((StringType)m_Nickname);
-		tGame.VDict["target"] = make_shared<Value>((StringType)m_VirtualAddr);
-		tGame.VDict["port"] = make_shared<Value>((IntType)m_GamePort);
-		tGame.VDict["delay"] = make_shared<Value>((IntType)m_iDelay.count());
+		tGame.VDict["nick"] = make_shared<Value>((StringType)i->GetNickname());
+		tGame.VDict["target"] = make_shared<Value>((StringType)i->GetVirtualAddr());
+		tGame.VDict["port"] = make_shared<Value>((IntType)i->GetGamePort());
+		tGame.VDict["delay"] = make_shared<Value>((IntType)i->GetDelay().count());
 		tGameList.VList.emplace_back(make_shared<Value>(std::move(tGame)));
 	}
 	tPackage.VDict["hosts"] = make_shared<Value>(std::move(tGameList));
