@@ -18,6 +18,18 @@ Client::Client(ISocketFactory* pFactory, ILogger* pLogger, const std::string& se
 	m_pSocket->SetBlockingMode(false);
 }
 
+Client::~Client()
+{
+	if (m_threadMain)
+	{
+		if (m_threadMain->joinable())
+		{
+			m_stopFlag = true;
+			m_threadMain->join();
+		}	
+	}
+}
+
 void Client::Start()
 {
 	if (m_bRunning)
@@ -126,6 +138,7 @@ bool Client::poll(const Bencode::Value& v)
 		// 发送pong数据包
 		{
 			m_iDelay = PackageHelper::GetPackageField<int>(v, "delay");
+			OnDelayRefreshed();
 
 			Value tPackage(ValueType::Dictionary);
 			tPackage.VDict["type"] = make_shared<Bencode::Value>((IntType)PackageType::Pong);

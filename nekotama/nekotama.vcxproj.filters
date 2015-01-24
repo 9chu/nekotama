@@ -24,6 +24,27 @@
     <ClInclude Include="SocketHook.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ComHooker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Dx9Hooker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientImplement.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientRenderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="NonOutputLogger.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HookedSocket.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoding.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="APIHooker.cpp">
@@ -36,6 +57,24 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SocketHook.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHooker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Dx9Hooker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientImplement.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HookedSocket.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoding.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

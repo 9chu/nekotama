@@ -9,4 +9,8 @@ namespace nekotama
 	/// @brief 字符串格式化
 	/// @note  支持 %f %d %u %lf %ld %lu %c %s，不支持精度处理，自带容错处理
 	std::string StringFormat(const char* Format, ...)NKNOEXCEPT;
+
+	/// @brief 字符串格式化（宽字符版本）
+	/// @note  支持 %f %d %u %lf %ld %lu %c %s，不支持精度处理，自带容错处理
+	std::wstring StringFormat(const wchar_t* Format, ...)NKNOEXCEPT;
 }

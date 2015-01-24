@@ -56,13 +56,15 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;NEKOTAMA_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;NEKOTAMA_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;d3d9.lib;d3dx9.lib;nekotama_socket_d.lib;Bencode_d.lib;nekotama_protocol_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\extern\Bencode\Bencode\bin\;$(SolutionDir)\nekotama_socket\bin\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>XCOPY /Y /D "bin\nekotama_d.dll" "$(SolutionDir)\nekotama_injecter\bin\"</Command>
@@ -76,16 +78,18 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;NEKOTAMA_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;NEKOTAMA_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;d3d9.lib;d3dx9.lib;nekotama_socket.lib;Bencode.lib;nekotama_protocol.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\extern\Bencode\Bencode\bin\;$(SolutionDir)\nekotama_socket\bin\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>XCOPY /Y /D "bin\nekotama.dll" "$(SolutionDir)\nekotama_injecter\bin\"</Command>
@@ -93,12 +97,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="APIHooker.h" />
+    <ClInclude Include="ClientImplement.h" />
+    <ClInclude Include="ComHooker.h" />
+    <ClInclude Include="Dx9Hooker.h" />
+    <ClInclude Include="ClientRenderer.h" />
+    <ClInclude Include="Encoding.h" />
+    <ClInclude Include="HookedSocket.h" />
     <ClInclude Include="HookUtil.h" />
+    <ClInclude Include="NonOutputLogger.h" />
     <ClInclude Include="SocketHook.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="APIHooker.cpp" />
+    <ClCompile Include="ClientImplement.cpp" />
+    <ClCompile Include="ComHooker.cpp" />
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="Dx9Hooker.cpp" />
+    <ClCompile Include="ClientRenderer.cpp" />
+    <ClCompile Include="Encoding.cpp" />
+    <ClCompile Include="HookedSocket.cpp" />
     <ClCompile Include="HookUtil.cpp" />
     <ClCompile Include="SocketHook.cpp" />
   </ItemGroup>

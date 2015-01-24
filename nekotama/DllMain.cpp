@@ -1,15 +1,139 @@
-#define _CRT_SECURE_NO_WARNINGS
-
-#include "APIHooker.h"
+#include "ComHooker.h"
 #include "HookUtil.h"
 #include "SocketHook.h"
+#include "Dx9Hooker.h"
+#include "ClientImplement.h"
 
 #include <cstdint>
 #include <sstream>
+#include <memory>
 
 using namespace std;
 using namespace nekotama;
 
+static std::wstring g_DllWorkPath;
+static std::shared_ptr<ClientRenderer> g_ClientRenderer;
+static std::shared_ptr<ClientImplement> g_ClientImplement;
+
+// ===== 窗口消息 Hook部分 =====
+static LRESULT(CALLBACK *raw_WindowProc)(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+LRESULT CALLBACK hook_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (uMsg == WM_DESTROY)
+	{
+		if (g_ClientImplement)  // 释放客户端实现部分
+		{
+			g_ClientImplement->GentlyStop();
+			g_ClientImplement->Wait();
+		}
+		g_ClientRenderer = nullptr;  // 在这里释放客户端界面
+		g_ClientImplement = nullptr;
+	}	
+	return CallWindowProc((WNDPROC)raw_WindowProc, hwnd, uMsg, wParam, lParam);
+};
+
+// ===== Direct3D Hook部分 =====
+static HRESULT(WINAPI *raw_IDirect3DDevice9_Present)(IDirect3DDevice9* pThis, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
+static HRESULT(WINAPI *raw_IDirect3D9_CreateDevice)(IDirect3D9* pThis, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface);
+
+static HRESULT WINAPI hook_IDirect3DDevice9_Present(IDirect3DDevice9* pThis, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion)
+{
+	// 绘制客户端界面
+	if (g_ClientRenderer)
+		g_ClientRenderer->Render();
+
+	// 执行原始函数
+	HRESULT tResult = raw_IDirect3DDevice9_Present(pThis, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+
+	// 检查虚表改动
+	if (ComHooker::GetFuncPtr(pThis, 17) != hook_IDirect3DDevice9_Present)
+		*(void**)&raw_IDirect3DDevice9_Present = ComHooker::HookVptr(pThis, 17, hook_IDirect3DDevice9_Present);
+
+	return tResult;
+}
+
+static HRESULT WINAPI hook_IDirect3D9_CreateDevice(IDirect3D9* pThis, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface)
+{
+	HRESULT tResult = raw_IDirect3D9_CreateDevice(pThis, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+	if (SUCCEEDED(tResult))
+	{
+		if (!g_ClientRenderer)
+		{
+			// Hook相应函数
+			*(void**)&raw_IDirect3DDevice9_Present = ComHooker::HookVptr(*ppReturnedDeviceInterface, 17, hook_IDirect3DDevice9_Present);  // IDirect3DDevice9::Present
+
+			// 构造初始化客户端界面渲染器
+			g_ClientRenderer = make_shared<ClientRenderer>(g_DllWorkPath + L"\\assets", *ppReturnedDeviceInterface);
+
+			// 构造客户端
+			// !TODO
+			try
+			{
+				g_ClientImplement = make_shared<ClientImplement>(g_ClientRenderer, "127.0.0.1", "chu");
+				g_ClientImplement->Start();
+			}
+			catch (...)
+			{
+				g_ClientImplement = nullptr;
+			}
+			
+			// hook窗口函数
+			*(LONG*)&raw_WindowProc = SetWindowLong(hFocusWindow, GWL_WNDPROC, (LONG)hook_WindowProc);
+		}
+	}
+	return tResult;
+}
+
+// ===== Socket Hook部分 =====
+
+
+BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+		{
+			APIHooker tMainModule;
+			
+			// 获取DLL执行路径
+			int i = 0;
+			wchar_t tDllPath[MAX_PATH + 1];
+			GetModuleFileName((HMODULE)hModule, tDllPath, MAX_PATH);
+			while (tDllPath[i] != '\0') { ++i; }
+			while (tDllPath[i] != '\\') { --i; }
+			tDllPath[i] = '\0';
+			g_DllWorkPath = tDllPath;
+
+			// Direct3D Hook
+			Dx9Hook(tMainModule);
+			SetCallback_Direct3DCreate9([](UINT SDKVersion) -> IDirect3D9* {
+				IDirect3D9* ret = Dx9_Direct3DCreate9(SDKVersion);
+				if (raw_IDirect3D9_CreateDevice == nullptr)
+					*(void**)&raw_IDirect3D9_CreateDevice = ComHooker::HookVptr(ret, 16, hook_IDirect3D9_CreateDevice);  // IDirect3D9::CreateDevice
+				return ret;
+			});
+
+			// Socket Hook
+			SocketHook(tMainModule);
+			// !TODO
+
+			// 恢复主线程
+			ResumeMainThread();
+		}
+		break;
+	case DLL_PROCESS_DETACH:
+		break;
+	case DLL_THREAD_ATTACH:
+		break;
+	case DLL_THREAD_DETACH:
+		break;
+	}
+	return (TRUE);
+}
+
+
+/*
 HANDLE g_ConsoleOutput;
 
 void OutDbg(const std::string& str)
@@ -63,6 +187,14 @@ public:
 
 TestListener g_test;
 
+std::shared_ptr<HookRenderer> g_renderer;
+
+static HRESULT(WINAPI *raw_Present)(IDirect3DDevice9* pThis, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
+
+static HRESULT(WINAPI *raw_CreateDevice)(IDirect3D9* pThis, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface);
+
+
+
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
 	switch (ul_reason_for_call)
@@ -74,6 +206,16 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 			SetCallback_Socket([](int af, int type, int protocol , ISocketHooker*& listener) -> SOCKET {
 				listener = &g_test;
 				return Socket_Socket(af, type, protocol);
+			});
+
+			// DXHook
+			Dx9Hook(mainModule);
+			SetCallback_Direct3DCreate9([](UINT SDKVersion) -> IDirect3D9* {
+				IDirect3D9* ret = Dx9_Direct3DCreate9(SDKVersion);
+				OutDbg("Direct3DCreate9 called.\n");
+				OutDbg("Hooking IDirect3D9::CreateDevice...\n");
+				*(void**)&raw_CreateDevice = ComHooker::HookVptr(ret, 16, hook_CreateDevice);  // IDirect3D9::CreateDevice
+				return ret;
 			});
 
 			// 创建控制台
@@ -93,3 +235,4 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	}
 	return (TRUE);
 }
+*/

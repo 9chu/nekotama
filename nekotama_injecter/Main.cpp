@@ -5,7 +5,7 @@ using namespace nekotama;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	Process  tProg(L"C:\\Games\\fxtz\\th123.exe", L"C:\\Games\\fxtz\\th123.exe", L"C:\\Games\\fxtz\\");
+	Process  tProg(L"D:\\Touhou\\东方非想天则\\th123.exe", L"D:\\Touhou\\东方非想天则\\th123.exe", L"D:\\Touhou\\东方非想天则\\");
 #ifdef _DEBUG
 	Injecter tInject(
 		tProg.GetProcessId(), 

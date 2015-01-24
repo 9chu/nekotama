@@ -95,7 +95,9 @@ namespace nekotama
 		virtual void OnLoginSucceed(const std::string& server, const std::string& nickname, const std::string& addr, uint16_t gameport)NKNOEXCEPT {}
 		virtual void OnDataArrival(const std::string& source_ip, uint16_t source_port, uint16_t target_port, const std::string& data)NKNOEXCEPT {}
 		virtual void OnRefreshGameInfo(const std::vector<GameInfo>& info)NKNOEXCEPT {}
+		virtual void OnDelayRefreshed()NKNOEXCEPT {}
 	public:
 		Client(ISocketFactory* pFactory, ILogger* pLogger, const std::string& serverip, const std::string& nickname, uint16_t port = 12801);
+		~Client();
 	};
 }
