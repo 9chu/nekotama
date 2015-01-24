@@ -28,7 +28,7 @@ static chrono::microseconds HINT_SHOWTIME = chrono::duration_cast<chrono::micros
 
 ClientRenderer::ClientRenderer(const std::wstring& resDir, IDirect3DDevice9* pDev)
 	: m_pDev(pDev), m_ResDir(resDir), m_cFPS(0), m_cFrameCounter(0), m_pFPSFont(NULL), m_iDelay((uint32_t)-1),
-	m_bGameInfoListVisible(false)
+	m_bGameInfoListVisible(false), m_bDevLost(false)
 {
 	// ´´½¨×ÖÌå
 	D3DXCreateFont(m_pDev, 16, 0, 1, D3DX_DEFAULT, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, 0, L"Times New Roman", &m_pFPSFont);
@@ -135,22 +135,28 @@ void ClientRenderer::ShowGameInfoList()
 
 void ClientRenderer::DoDeviceLost()
 {
+	if (m_bDevLost)
+		return;
 	if (m_pFPSFont)
 		m_pFPSFont->OnLostDevice();
 	if (m_pHintFont)
 		m_pHintFont->OnLostDevice();
 	if (m_pMainSprite)
 		m_pMainSprite->OnLostDevice();
+	m_bDevLost = true;
 }
 
 void ClientRenderer::DoDeviceReset()
 {
+	if (!m_bDevLost)
+		return;
 	if (m_pFPSFont)
 		m_pFPSFont->OnResetDevice();
 	if (m_pHintFont)
 		m_pHintFont->OnResetDevice();
 	if (m_pMainSprite)
 		m_pMainSprite->OnResetDevice();
+	m_bDevLost = false;
 }
 
 void ClientRenderer::Render()
@@ -205,6 +211,9 @@ void ClientRenderer::Render()
 		else
 			++i;
 	}
+
+	if (m_bDevLost)
+		return;
 
 	m_pDev->Clear(0, NULL, D3DCLEAR_ZBUFFER, 0, 1.0f, 0);
 	m_pDev->BeginScene();

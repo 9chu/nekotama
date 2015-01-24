@@ -103,7 +103,8 @@ static HRESULT WINAPI hook_IDirect3DDevice9_GetSwapChain(IDirect3DDevice9* pThis
 	if (SUCCEEDED(tRet))
 	{
 		// hookº¯Êý
-		*(void**)&raw_IDirect3DSwapChain9_Present = ComHooker::HookVptr(*pSwapChain, 3, hook_IDirect3DSwapChain9_Present);  // IDirect3DSwapChain9::Present
+		if (ComHooker::GetFuncPtr(*pSwapChain, 3) != hook_IDirect3DSwapChain9_Present)
+			*(void**)&raw_IDirect3DSwapChain9_Present = ComHooker::HookVptr(*pSwapChain, 3, hook_IDirect3DSwapChain9_Present);  // IDirect3DSwapChain9::Present
 	}
 	return tRet;
 }

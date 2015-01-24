@@ -42,6 +42,7 @@ namespace nekotama
 		std::wstring m_ResDir;
 
 		// ืสิด
+		bool m_bDevLost;
 		CComPtr<ID3DXFont> m_pFPSFont;
 		CComPtr<ID3DXFont> m_pHintFont;
 		CComPtr<IDirect3DTexture9> m_pHintBackground;
