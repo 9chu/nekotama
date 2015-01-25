@@ -22,6 +22,9 @@ ClientSession::ClientSession(Server* server, SocketHandle handle, const std::str
 	m_iState(ClientSessionState::Invalid), m_bShouldBeClosed(false), m_iBytesRecved(0), m_iLastDataNotSent(0),
 	m_bPingSent(false)
 {
+    m_iRecvTimer = chrono::milliseconds::zero();
+    m_iLoginTimer = chrono::milliseconds::zero();
+
 	// 检查会话上限
 	if (count >= server->GetMaxClients())
 	{
@@ -155,7 +158,6 @@ void ClientSession::poll(const Bencode::Value& v)
 				m_bPingSent = false;
 				m_iPongTimer = chrono::milliseconds::zero();
 				m_iPingTimer = chrono::milliseconds::zero();
-				m_iRecvTimer = chrono::milliseconds::zero();
 				m_iDelay = chrono::milliseconds::zero();
 
 				m_pLogger->Log(StringFormat("客户端登陆成功，昵称: %s，虚拟ip: %s。(%s:%u)", tNickname.c_str(), tAddr.c_str(), m_sIP.c_str(), m_uPort));

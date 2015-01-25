@@ -1,7 +1,7 @@
 #include "Server.h"
 
 // 最小的计时时间步
-#define TIMETICKSTEP 16
+#define TIMETICKSTEP 32
 
 using namespace std;
 using namespace nekotama;
@@ -59,7 +59,7 @@ bool Server::IsRunning()const NKNOEXCEPT
 void Server::mainThreadLoop()NKNOEXCEPT
 {
 	m_stopFlag = false;
-	
+
 	SocketHandleSet tAllHandles;
 	SocketHandleSet tReadHandles;
 	SocketHandleSet tWriteHandles;
@@ -68,7 +68,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 
 	while (!m_stopFlag)
 	{
-		auto tLast = std::chrono::system_clock::now();
+		auto tLast = std::chrono::high_resolution_clock::now();
 
 		// 统计所有的会话
 		tAllHandles.clear();
@@ -79,13 +79,13 @@ void Server::mainThreadLoop()NKNOEXCEPT
 			tAllHandles.insert(i.first);
 			if (i.second->HasData())
 				tWriteHandles.insert(i.first);
-		}	
+		}
 		tReadHandles = tErrorHandles = tAllHandles;
 		tReadHandles.insert(m_srvSocket);
 
 		// 进行select
 		try
-		{	
+		{
 			if (m_pFactory->Select(&tReadHandles, &tWriteHandles, &tErrorHandles, TIMETICKSTEP))
 			{
 				// 检查可读性
@@ -103,6 +103,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 							// 创建Session并加入管理
 							try
 							{
+                                tSocket->SetBlockingMode(false);
 								m_mpClients[tSocket] = ClientSessionHandle(new ClientSession(this, tSocket, tIP, tPort, m_mpClients.size()));
 							}
 							catch (const std::exception& e)
@@ -167,8 +168,8 @@ void Server::mainThreadLoop()NKNOEXCEPT
 			m_stopFlag = true;
 			break;
 		}
-		
-		auto tCur = std::chrono::system_clock::now();
+
+		auto tCur = std::chrono::high_resolution_clock::now();
 		chrono::milliseconds tTick = chrono::milliseconds::zero();
 		tTick = chrono::duration_cast<chrono::milliseconds>(tCur - tLast);
 		tLast = tCur;
@@ -216,7 +217,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 				}
 			}
 		}
-		
+
 		// 移除所有失效会话
 		for (auto i : tInvalidHandles)
 		{

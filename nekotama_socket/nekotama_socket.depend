@@ -1,11 +1,12 @@
 # depslib dependency file v1.0
-1422166068 source:/home/chu/workspace/nekotama/nekotama_socket/Socket_linux.cpp
+1422171432 source:/home/chu/workspace/nekotama/nekotama_socket/Socket_linux.cpp
 	"Socket.h"
 	<atomic>
 	<algorithm>
 	<cstring>
 	<errno.h>
 	<unistd.h>
+	<fcntl.h>
 	<sys/types.h>
 	<sys/socket.h>
 	<sys/ioctl.h>

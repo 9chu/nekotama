@@ -6,6 +6,7 @@
 
 #include <errno.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -60,49 +61,50 @@ SocketHandle SocketFactory::Create(SocketType type)
 
 bool SocketFactory::Select(SocketHandleSet* read, SocketHandleSet* write, SocketHandleSet* error, uint32_t timeout)
 {
-	fd_set tRead = { 0 }, tWrite = { 0 }, tError = { 0 };
-	size_t tCount = 0;
+	fd_set tRead, tWrite, tError;
+	FD_ZERO(&tRead);
+	FD_ZERO(&tWrite);
+	FD_ZERO(&tError);
+	size_t tMaxFd = 0;
 	if (read)
 	{
 		if (read->size() >= FD_SETSIZE)
 			throw logic_error("Select: socket handles are more than FD_SETSIZE.");
-		else
-			tCount = max(tCount, read->size());
 		for (auto p : *read)
 		{
 			FD_SET(p->GetNativeHandle(), &tRead);
+			tMaxFd = max(tMaxFd, (size_t)p->GetNativeHandle());
 		}
 	}
 	if (write)
 	{
 		if (write->size() >= FD_SETSIZE)
 			throw logic_error("Select: socket handles are more than FD_SETSIZE.");
-		else
-			tCount = max(tCount, write->size());
 		for (auto p : *write)
 		{
 			FD_SET(p->GetNativeHandle(), &tWrite);
+			tMaxFd = max(tMaxFd, (size_t)p->GetNativeHandle());
 		}
 	}
 	if (error)
 	{
 		if (error->size() >= FD_SETSIZE)
 			throw logic_error("Select: socket handles are more than FD_SETSIZE.");
-		else
-			tCount = max(tCount, error->size());
 		for (auto p : *error)
 		{
 			FD_SET(p->GetNativeHandle(), &tError);
+			tMaxFd = max(tMaxFd, (size_t)p->GetNativeHandle());
 		}
 	}
-	timeval t = { timeout / 1000, timeout % 1000 };
-	if (tCount == 0 || errno == EWOULDBLOCK || errno == EAGAIN)
+	timeout *= 1000;
+	timeval t = { timeout / 1000000, timeout % 1000000 };
+	if (tMaxFd == 0)
 		return false;
 	int tRet = select(
-		tCount,
-		!read || read->size() > 0 ? &tRead : nullptr,
-		!write || write->size() > 0 ? &tWrite : nullptr,
-		!error || error->size() > 0 ? &tError : nullptr,
+		tMaxFd + 1,
+		read && read->size() > 0 ? &tRead : nullptr,
+		write && write->size() > 0 ? &tWrite : nullptr,
+		error && error->size() > 0 ? &tError : nullptr,
 		timeout == (uint32_t)-1 ? nullptr : &t
 	);
 	if (tRet == SOCKET_ERROR || tRet == 0)
@@ -111,7 +113,7 @@ bool SocketFactory::Select(SocketHandleSet* read, SocketHandleSet* write, Socket
 		if (write) write->clear();
 		if (error) error->clear();
 
-		if (tRet == 0)
+		if (tRet == 0 || errno == EWOULDBLOCK || errno == EAGAIN)
 			return false;
 		else
 			throw logic_error(StringFormat("@%s: %s", "select", LASTWSAERR));
@@ -172,9 +174,9 @@ void Socket::IOControl(int32_t cmd, uint32_t* args)
 
 void Socket::SetBlockingMode(bool blocking)
 {
-	uint32_t v = blocking ? 0 : 1;
-	if (SOCKET_ERROR == ioctl(m_Socket, FIONBIO, (u_long*)&v))
-		throw logic_error(StringFormat("@%s: %s", "ioctlsocket", LASTWSAERR));
+	int flags = fcntl(m_Socket, F_GETFL, 0);
+    if (SOCKET_ERROR == fcntl(m_Socket, F_SETFL, blocking ? flags & ~O_NONBLOCK : flags|O_NONBLOCK))
+		throw logic_error(StringFormat("@%s: %s", "fcntl", LASTWSAERR));
 }
 
 void Socket::Bind(const char* addr, uint16_t port)
