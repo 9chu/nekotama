@@ -183,23 +183,37 @@ void Server::mainThreadLoop()NKNOEXCEPT
 				{
 					tInvalidHandles.insert(p);
 				}
-				else if (i.first->TestIfClosed())
-				{
-					m_pLogger->Log(StringFormat("mainThread: session未正常退出。(%s:%u)", p->GetIP().c_str(), p->GetPort()), LogType::Error);
-					tInvalidHandles.insert(p);
-				}
 				else
 				{
+					bool bRemoved = false;
 					try
 					{
-						p->update(tTick);
+						if (i.first->TestIfClosed())
+						{
+							m_pLogger->Log(StringFormat("mainThread: session未正常退出。(%s:%u)", p->GetIP().c_str(), p->GetPort()), LogType::Error);
+							tInvalidHandles.insert(p);
+							bRemoved = true;
+						}
 					}
 					catch (const std::exception& e)
 					{
-						m_pLogger->Log(StringFormat("session: 执行update时发生错误，移除session。(%s:%u: %s)", i.second->GetIP().c_str(), i.second->GetPort(), e.what()), LogType::Error);
-						tInvalidHandles.insert(i.second);
+						m_pLogger->Log(StringFormat("mainThread: session未正常退出(%s:%u)。(%s)", p->GetIP().c_str(), p->GetPort(), e.what()), LogType::Error);
+						tInvalidHandles.insert(p);
+						bRemoved = true;
 					}
-				}	
+					if (!bRemoved)
+					{
+						try
+						{
+							p->update(tTick);
+						}
+						catch (const std::exception& e)
+						{
+							m_pLogger->Log(StringFormat("session: 执行update时发生错误，移除session。(%s:%u: %s)", i.second->GetIP().c_str(), i.second->GetPort(), e.what()), LogType::Error);
+							tInvalidHandles.insert(i.second);
+						}
+					}
+				}
 			}
 		}
 		

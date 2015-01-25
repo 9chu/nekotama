@@ -3,6 +3,9 @@
 // 最小的计时时间步
 #define TIMETICKSTEP 16
 
+#define CONNECT_TIMETICKSTEP 500
+#define CONNECT_TIMEOUT 5000
+
 using namespace std;
 using namespace nekotama;
 using namespace Bencode;
@@ -192,6 +195,27 @@ void Client::mainThreadLoop()NKNOEXCEPT
 		m_bRunning = false;
 		OnConnectFailed();
 		return;
+	}
+
+	// 等待连接建立
+	SocketHandleSet tWriteTestSet;
+	chrono::system_clock::time_point tConnectionStart = chrono::system_clock::now();
+	while (!m_stopFlag)
+	{
+		tWriteTestSet.clear();
+		tWriteTestSet.insert(m_pSocket);
+		if (m_pFactory->Select(nullptr, &tWriteTestSet, nullptr, CONNECT_TIMETICKSTEP))
+		{
+			break;
+		}
+
+		if (CONNECT_TIMEOUT < chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - tConnectionStart).count())
+		{
+			m_pLogger->Log(StringFormat("连接到服务器失败，超时。(%s:%u)", m_sIP.c_str(), m_iPort), LogType::Error);
+			m_bRunning = false;
+			OnConnectFailed();
+			return;
+		}
 	}
 
 	// 初始化发送线程

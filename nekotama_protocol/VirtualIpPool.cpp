@@ -51,6 +51,8 @@ uint32_t VirtualIpPool::Alloc()
 		}
 		if (d == 0)
 			++m_cLastIp;
+		if (d == 1)
+			++m_cLastIp;
 		if ((m_cLastIp & m_IpMask) != m_subNetwork)
 		{
 			// IP¶ÎºÄ¾¡
