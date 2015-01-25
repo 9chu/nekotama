@@ -9,8 +9,19 @@
 #include <sstream>
 #include <memory>
 
+#include <ConfigFile.h>
+#include "Encoding.h"
+
 using namespace std;
 using namespace nekotama;
+
+#ifndef CLIENT_CONFIG_PATH
+#define CLIENT_CONFIG_PATH "nekotama.conf"
+#endif
+
+static std::string g_ServerAddr;
+static uint16_t g_ServerPort;
+static std::string g_Nickname;
 
 static std::wstring g_DllWorkPath;
 static std::shared_ptr<ClientRenderer> g_ClientRenderer;
@@ -149,10 +160,9 @@ static HRESULT WINAPI hook_IDirect3D9_CreateDevice(IDirect3D9* pThis, UINT Adapt
 			g_ClientRenderer = make_shared<ClientRenderer>(g_DllWorkPath + L"\\assets", *ppReturnedDeviceInterface);
 
 			// 构造客户端
-			// !TODO
 			try
 			{
-				g_ClientImplement = make_shared<ClientImplement>(g_ClientRenderer, "127.0.0.1", "chu");
+				g_ClientImplement = make_shared<ClientImplement>(g_ClientRenderer, g_ServerAddr, g_Nickname, g_ServerPort);
 				g_ClientImplement->Start();
 			}
 			catch (...)
@@ -167,6 +177,44 @@ static HRESULT WINAPI hook_IDirect3D9_CreateDevice(IDirect3D9* pThis, UINT Adapt
 	return tResult;
 }
 
+// ===== 域名到IP =====
+static bool DomainToIP(const char* pDomain, char* pIPBuff)
+{
+	unsigned long lgIP = inet_addr(pDomain);
+
+	WSADATA wsaData;
+	WSAStartup(MAKEWORD(1, 1), &wsaData);
+
+	// 输入为IP字符串
+	if (lgIP != INADDR_NONE)
+	{
+		memcpy(pIPBuff, pDomain, strlen(pDomain));
+		WSACleanup();
+
+		return true;
+	}
+
+	HOSTENT *host_entry;
+	host_entry = gethostbyname(pDomain);
+
+	if (host_entry != 0)
+	{
+		sprintf(pIPBuff, "%d.%d.%d.%d",
+			(host_entry->h_addr_list[0][0] & 0xff),
+			(host_entry->h_addr_list[0][1] & 0xff),
+			(host_entry->h_addr_list[0][2] & 0xff),
+			(host_entry->h_addr_list[0][3] & 0xff));
+	}
+	else
+	{
+		WSACleanup();
+		return false;
+	}
+
+	WSACleanup();
+	return true;
+}
+
 // ===== DLL入口 =====
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
@@ -174,8 +222,6 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	{
 	case DLL_PROCESS_ATTACH:
 		{
-			APIHooker tMainModule;
-			
 			// 获取DLL执行路径
 			int i = 0;
 			wchar_t tDllPath[MAX_PATH + 1];
@@ -184,6 +230,27 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 			while (tDllPath[i] != '\\') { --i; }
 			tDllPath[i] = '\0';
 			g_DllWorkPath = tDllPath;
+
+			APIHooker tMainModule;
+			
+			// 装载配置文件
+			ConfigFile tCfg;
+			tCfg["server"] = "127.0.0.1";
+			tCfg["port"] = "12801";
+			tCfg["nickname"] = "chu";
+			tCfg.Load(WideCharToMultiByte(g_DllWorkPath) + "\\" + CLIENT_CONFIG_PATH, true);
+			g_ServerPort = atoi(tCfg["port"].c_str());
+			if (g_ServerPort <= 1024)
+				g_ServerPort = 12801;
+			g_Nickname = tCfg["nickname"];
+			if (g_Nickname.length() < 3 || g_Nickname.length() > 16)
+				g_Nickname = "chu";
+
+			// 获取服务器ip
+			char tIpBuf[128] = { 0 };
+			g_ServerAddr = tCfg["server"];
+			if (DomainToIP(tCfg["server"].c_str(), tIpBuf))
+				g_ServerAddr = tIpBuf;
 
 			// Direct3D Hook
 			Dx9Hook(tMainModule);

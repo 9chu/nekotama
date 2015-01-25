@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <string>
 
-#include "Util.h"
+#include <StringFormat.h>
 
 namespace nekotama
 {

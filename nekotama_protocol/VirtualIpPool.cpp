@@ -1,6 +1,6 @@
 #include "VirtualIpPool.h"
 
-#include <Util.h>
+#include <StringFormat.h>
 
 using namespace std;
 using namespace nekotama;

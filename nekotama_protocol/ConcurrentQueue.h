@@ -3,7 +3,7 @@
 #include <queue>
 #include <condition_variable>
 
-#include <Util.h>
+#include <StringFormat.h>
 
 namespace nekotama
 {

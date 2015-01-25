@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <mutex>
 
 #include <ConcurrentQueue.h>
 
@@ -29,6 +30,7 @@ namespace nekotama
 				: ip(org.ip), port(org.port), data(org.data) {}
 		};
 	private:
+		std::mutex m_Mutex;
 		std::weak_ptr<ClientImplement> m_pImplement;
 		uint16_t m_iBindedPort;
 

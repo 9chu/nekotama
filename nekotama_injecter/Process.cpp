@@ -1,5 +1,10 @@
 #include "Process.h"
 
+#include <stdexcept>
+
+#include <StringFormat.h>
+
+using namespace std;
 using namespace nekotama;
 
 std::wstring Process::GetGurrentDirectory()
@@ -20,7 +25,7 @@ Process::Process(LPCWSTR Path, LPCWSTR CommandLine, LPCWSTR Environment)
 	if(!CreateProcess(Path, (LPWSTR)CommandLine, NULL, NULL, FALSE, CREATE_SUSPENDED|CREATE_NEW_CONSOLE|CREATE_UNICODE_ENVIRONMENT|CREATE_DEFAULT_ERROR_MODE, NULL, Environment, &tStartupInfo, &m_Info))
 	{
 		UINT tRet = GetLastError();
-		throw "Err";
+		throw logic_error(StringFormat("CreateProcess failed. (LastError=%d)", tRet));
 	}
 }
 

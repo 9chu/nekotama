@@ -15,15 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Socket.h">
+    <ClInclude Include="StringFormat.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ISocket.h">
+    <ClInclude Include="ConfigFile.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Socket.cpp">
+    <ClCompile Include="StringFormat.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

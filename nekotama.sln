@@ -25,10 +25,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nekotama_server", "nekotama
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nekotama_socket", "nekotama_socket\nekotama_socket.vcxproj", "{DC3F0820-7C2B-4D39-BC62-E37612F0EE1B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B721149B-C199-4EDE-9D80-46B0C55EB3FE} = {B721149B-C199-4EDE-9D80-46B0C55EB3FE}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extern", "extern", "{41A6EDAA-CA70-4C03-9EC5-111E346E9AAC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bencode", "extern\Bencode\Bencode\Bencode.vcxproj", "{F90DE97C-235D-4272-BE10-D94EB7D92380}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nekotama_utils", "nekotama_utils\nekotama_utils.vcxproj", "{B721149B-C199-4EDE-9D80-46B0C55EB3FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,6 +65,10 @@ Global
 		{F90DE97C-235D-4272-BE10-D94EB7D92380}.Debug|Win32.Build.0 = Debug|Win32
 		{F90DE97C-235D-4272-BE10-D94EB7D92380}.Release|Win32.ActiveCfg = Release|Win32
 		{F90DE97C-235D-4272-BE10-D94EB7D92380}.Release|Win32.Build.0 = Release|Win32
+		{B721149B-C199-4EDE-9D80-46B0C55EB3FE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B721149B-C199-4EDE-9D80-46B0C55EB3FE}.Debug|Win32.Build.0 = Debug|Win32
+		{B721149B-C199-4EDE-9D80-46B0C55EB3FE}.Release|Win32.ActiveCfg = Release|Win32
+		{B721149B-C199-4EDE-9D80-46B0C55EB3FE}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

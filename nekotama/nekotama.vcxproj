@@ -58,13 +58,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;NEKOTAMA_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\;$(SolutionDir)\nekotama_utils\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;d3d9.lib;d3dx9.lib;nekotama_socket_d.lib;Bencode_d.lib;nekotama_protocol_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\extern\Bencode\Bencode\bin\;$(SolutionDir)\nekotama_socket\bin\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;d3d9.lib;d3dx9.lib;nekotama_socket_d.lib;Bencode_d.lib;nekotama_protocol_d.lib;nekotama_utils_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\extern\Bencode\Bencode\bin\;$(SolutionDir)\nekotama_socket\bin\;$(SolutionDir)\nekotama_utils\bin\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>XCOPY /Y /D "bin\nekotama_d.dll" "$(SolutionDir)\nekotama_injecter\bin\"</Command>
@@ -81,15 +81,15 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;NEKOTAMA_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir)\nekotama_protocol\;$(SolutionDir)\nekotama_socket\;$(SolutionDir)\extern\Bencode\Bencode\;$(SolutionDir)\nekotama_utils\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;d3d9.lib;d3dx9.lib;nekotama_socket.lib;Bencode.lib;nekotama_protocol.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\extern\Bencode\Bencode\bin\;$(SolutionDir)\nekotama_socket\bin\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Dbghelp.lib;ws2_32.lib;d3d9.lib;d3dx9.lib;nekotama_socket.lib;Bencode.lib;nekotama_protocol.lib;nekotama_utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(SolutionDir)\nekotama_protocol\bin\;$(SolutionDir)\extern\Bencode\Bencode\bin\;$(SolutionDir)\nekotama_socket\bin\;$(SolutionDir)\nekotama_utils\bin\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>XCOPY /Y /D "bin\nekotama.dll" "$(SolutionDir)\nekotama_injecter\bin\"</Command>

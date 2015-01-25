@@ -4,6 +4,7 @@
 
 #include "ClientImplement.h"
 
+using namespace std;
 using namespace nekotama;
 
 VirtualUDPConnection::VirtualUDPConnection(const std::weak_ptr<ClientImplement>& pImplement)
@@ -16,6 +17,7 @@ VirtualUDPConnection::~VirtualUDPConnection()
 	{
 		m_Packages.Push(DataPackage(std::string(), 0, std::string()));
 		m_bRecvShuted = true;
+		unique_lock<mutex> lock(m_Mutex);
 	}	
 }
 
@@ -53,6 +55,7 @@ int VirtualUDPConnection::CloseSocket(SOCKET s)
 	{
 		m_Packages.Push(DataPackage(std::string(), 0, std::string()));
 		m_bRecvShuted = true;
+		unique_lock<mutex> lock(m_Mutex);
 	}
 
 	auto p = m_pImplement.lock();
@@ -65,6 +68,8 @@ int VirtualUDPConnection::CloseSocket(SOCKET s)
 
 int VirtualUDPConnection::RecvFrom(SOCKET s, char* buf, int len, int flags, struct sockaddr* from, int* fromlen)
 {
+	unique_lock<mutex> lock(m_Mutex);
+
 	// ºöÂÔflags²ÎÊý
 	if (!((fromlen == 0 && from == 0) || (*fromlen == sizeof(sockaddr_in) && from != 0)))
 		return -1;
@@ -128,6 +133,7 @@ int VirtualUDPConnection::Shutdown(SOCKET s, int how)
 		{
 			m_Packages.Push(DataPackage(std::string(), 0, std::string()));
 			m_bRecvShuted = true;
+			unique_lock<mutex> lock(m_Mutex);
 		}
 	}
 		
