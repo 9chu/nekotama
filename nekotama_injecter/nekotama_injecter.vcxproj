@@ -101,12 +101,19 @@
     <ClInclude Include="Encoding.h" />
     <ClInclude Include="Injecter.h" />
     <ClInclude Include="Process.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Encoding.cpp" />
     <ClCompile Include="Injecter.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Process.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="nekotama_injecter.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

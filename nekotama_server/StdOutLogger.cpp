@@ -1,4 +1,4 @@
-#include "StdOutLogger.h"
+﻿#include "StdOutLogger.h"
 
 #include "ConsoleColor.h"
 
