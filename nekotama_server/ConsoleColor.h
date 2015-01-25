@@ -20,7 +20,7 @@ enum class ConsoleColors
 	Yellow = 14,
 	White = 15,
 };
-#else  
+#else
 enum class ConsoleColors
 {
 	Black = 30,
@@ -34,12 +34,12 @@ enum class ConsoleColors
 	DarkGreen = 32,
 	LightBlue = 34,
 	Orange = 33,
-	Grey = 30,
+	Grey = 37,
 	DarkerGrey = 37,
 	Teal = 30,
 	RedOrange = 33,
 	LightPurple = 31,
 };
-#endif  
+#endif
 
 extern void SetConsoleTextColor(ConsoleColors color);

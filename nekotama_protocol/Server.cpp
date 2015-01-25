@@ -1,6 +1,6 @@
 #include "Server.h"
 
-// ×îĞ¡µÄ¼ÆÊ±Ê±¼ä²½
+// æœ€å°çš„è®¡æ—¶æ—¶é—´æ­¥
 #define TIMETICKSTEP 16
 
 using namespace std;
@@ -12,15 +12,15 @@ Server::Server(ISocketFactory* pFactory, ILogger* pLogger, const std::string& se
 	: m_pFactory(pFactory), m_pLogger(pLogger), m_uPort(port), m_uMaxClients(maxClient), m_sServerName(server_name),
 	m_stopFlag(false), m_bRunning(false)
 {
-	// ´´½¨Socket¶ÔÏó
-	m_pLogger->Log("Server³õÊ¼»¯: ´´½¨Socket¶ÔÏó...");
+	// åˆ›å»ºSocketå¯¹è±¡
+	m_pLogger->Log("Serveråˆå§‹åŒ–: åˆ›å»ºSocketå¯¹è±¡...");
 	m_srvSocket = m_pFactory->Create(SocketType::TCP);
 	m_srvSocket->SetBlockingMode(false);
 
-	// ³õÊ¼»¯Socket
-	m_pLogger->Log(StringFormat("Server³õÊ¼»¯: °ó¶¨ÓÚ0.0.0.0:%u...", m_uPort));
+	// åˆå§‹åŒ–Socket
+	m_pLogger->Log(StringFormat("Serveråˆå§‹åŒ–: ç»‘å®šäº0.0.0.0:%u...", m_uPort));
 	m_srvSocket->Bind("0.0.0.0", m_uPort);
-	m_pLogger->Log("Server³õÊ¼»¯: Æô¶¯SocketÁ¬½ÓÕìÌı...");
+	m_pLogger->Log("Serveråˆå§‹åŒ–: å¯åŠ¨Socketè¿æ¥ä¾¦å¬...");
 	m_srvSocket->Listen();
 }
 
@@ -70,7 +70,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 	{
 		auto tLast = std::chrono::system_clock::now();
 
-		// Í³¼ÆËùÓĞµÄ»á»°
+		// ç»Ÿè®¡æ‰€æœ‰çš„ä¼šè¯
 		tAllHandles.clear();
 		tInvalidHandles.clear();
 		tWriteHandles.clear();
@@ -83,31 +83,31 @@ void Server::mainThreadLoop()NKNOEXCEPT
 		tReadHandles = tErrorHandles = tAllHandles;
 		tReadHandles.insert(m_srvSocket);
 
-		// ½øĞĞselect
+		// è¿›è¡Œselect
 		try
 		{	
 			if (m_pFactory->Select(&tReadHandles, &tWriteHandles, &tErrorHandles, TIMETICKSTEP))
 			{
-				// ¼ì²é¿É¶ÁĞÔ
+				// æ£€æŸ¥å¯è¯»æ€§
 				for (auto i : tReadHandles)
 				{
 					if (i == m_srvSocket)
 					{
-						// ½ÓÊÜÁ¬½Ó
+						// æ¥å—è¿æ¥
 						std::string tIP;
 						uint16_t tPort;
 						SocketHandle tSocket;
 
 						if (m_srvSocket->Accept(tIP, tPort, tSocket))
 						{
-							// ´´½¨Session²¢¼ÓÈë¹ÜÀí
+							// åˆ›å»ºSessionå¹¶åŠ å…¥ç®¡ç†
 							try
 							{
 								m_mpClients[tSocket] = ClientSessionHandle(new ClientSession(this, tSocket, tIP, tPort, m_mpClients.size()));
 							}
 							catch (const std::exception& e)
 							{
-								m_pLogger->Log(StringFormat("mainThread: ´´½¨sessionÊ±Ê§°Ü¡£(%s:%u: %s)", tIP.c_str(), tPort, e.what()), LogType::Error);
+								m_pLogger->Log(StringFormat("mainThread: åˆ›å»ºsessionæ—¶å¤±è´¥ã€‚(%s:%u: %s)", tIP.c_str(), tPort, e.what()), LogType::Error);
 
 								auto i = m_mpClients.find(tSocket);
 								if (i != m_mpClients.end())
@@ -126,13 +126,13 @@ void Server::mainThreadLoop()NKNOEXCEPT
 							}
 							catch (const std::exception& e)
 							{
-								m_pLogger->Log(StringFormat("session: Ö´ĞĞrecvÊ±·¢Éú´íÎó£¬ÒÆ³ısession¡£(%s:%u: %s)", p->GetIP().c_str(), p->GetPort(), e.what()), LogType::Error);
+								m_pLogger->Log(StringFormat("session: æ‰§è¡Œrecvæ—¶å‘ç”Ÿé”™è¯¯ï¼Œç§»é™¤sessionã€‚(%s:%u: %s)", p->GetIP().c_str(), p->GetPort(), e.what()), LogType::Error);
 								tInvalidHandles.insert(p);
 							}
 						}
 					}
 				}
-				// Í¨ÖªËùÓĞ¿É¶Á½Ó¿Ú
+				// é€šçŸ¥æ‰€æœ‰å¯è¯»æ¥å£
 				for (auto i : tWriteHandles)
 				{
 					ClientSessionHandle p = m_mpClients[i];
@@ -144,18 +144,18 @@ void Server::mainThreadLoop()NKNOEXCEPT
 						}
 						catch (const std::exception& e)
 						{
-							m_pLogger->Log(StringFormat("session: Ö´ĞĞsendÊ±·¢Éú´íÎó£¬ÒÆ³ısession¡£(%s:%u: %s)", p->GetIP().c_str(), p->GetPort(), e.what()), LogType::Error);
+							m_pLogger->Log(StringFormat("session: æ‰§è¡Œsendæ—¶å‘ç”Ÿé”™è¯¯ï¼Œç§»é™¤sessionã€‚(%s:%u: %s)", p->GetIP().c_str(), p->GetPort(), e.what()), LogType::Error);
 							tInvalidHandles.insert(p);
 						}
 					}
 				}
-				// Í¨ÖªËùÓĞ´íÎó½Ó¿Ú
+				// é€šçŸ¥æ‰€æœ‰é”™è¯¯æ¥å£
 				for (auto i : tErrorHandles)
 				{
 					ClientSessionHandle p = m_mpClients[i];
 					if (tInvalidHandles.find(p) == tInvalidHandles.end())
 					{
-						m_pLogger->Log(StringFormat("mainThread: ÓÉÓÚsocket´íÎó£¬½«ÒÆ³ısession¡£(%s:%u)", p->GetIP().c_str(), p->GetPort()), LogType::Error);
+						m_pLogger->Log(StringFormat("mainThread: ç”±äºsocketé”™è¯¯ï¼Œå°†ç§»é™¤sessionã€‚(%s:%u)", p->GetIP().c_str(), p->GetPort()), LogType::Error);
 						tInvalidHandles.insert(p);
 					}
 				}
@@ -163,7 +163,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 		}
 		catch (const std::exception& e)
 		{
-			m_pLogger->Log(StringFormat("mainThread: ·¢ÉúÁËÎ´Ô¤ÁÏµÄ´íÎó£¬ÖÕÖ¹ÔËĞĞ¡£(%s)", e.what()), LogType::Error);
+			m_pLogger->Log(StringFormat("mainThread: å‘ç”Ÿäº†æœªé¢„æ–™çš„é”™è¯¯ï¼Œç»ˆæ­¢è¿è¡Œã€‚(%s)", e.what()), LogType::Error);
 			m_stopFlag = true;
 			break;
 		}
@@ -173,7 +173,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 		tTick = chrono::duration_cast<chrono::milliseconds>(tCur - tLast);
 		tLast = tCur;
 
-		// Ë¢ĞÂ¼ÆÊıÆ÷²¢¼ì²é¿Í»§¶ËÊÇ·ñ´æ»î
+		// åˆ·æ–°è®¡æ•°å™¨å¹¶æ£€æŸ¥å®¢æˆ·ç«¯æ˜¯å¦å­˜æ´»
 		for (auto i : m_mpClients)
 		{
 			auto p = i.second;
@@ -190,14 +190,14 @@ void Server::mainThreadLoop()NKNOEXCEPT
 					{
 						if (i.first->TestIfClosed())
 						{
-							m_pLogger->Log(StringFormat("mainThread: sessionÎ´Õı³£ÍË³ö¡£(%s:%u)", p->GetIP().c_str(), p->GetPort()), LogType::Error);
+							m_pLogger->Log(StringFormat("mainThread: sessionæœªæ­£å¸¸é€€å‡ºã€‚(%s:%u)", p->GetIP().c_str(), p->GetPort()), LogType::Error);
 							tInvalidHandles.insert(p);
 							bRemoved = true;
 						}
 					}
 					catch (const std::exception& e)
 					{
-						m_pLogger->Log(StringFormat("mainThread: sessionÎ´Õı³£ÍË³ö(%s:%u)¡£(%s)", p->GetIP().c_str(), p->GetPort(), e.what()), LogType::Error);
+						m_pLogger->Log(StringFormat("mainThread: sessionæœªæ­£å¸¸é€€å‡º(%s:%u)ã€‚(%s)", p->GetIP().c_str(), p->GetPort(), e.what()), LogType::Error);
 						tInvalidHandles.insert(p);
 						bRemoved = true;
 					}
@@ -209,7 +209,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 						}
 						catch (const std::exception& e)
 						{
-							m_pLogger->Log(StringFormat("session: Ö´ĞĞupdateÊ±·¢Éú´íÎó£¬ÒÆ³ısession¡£(%s:%u: %s)", i.second->GetIP().c_str(), i.second->GetPort(), e.what()), LogType::Error);
+							m_pLogger->Log(StringFormat("session: æ‰§è¡Œupdateæ—¶å‘ç”Ÿé”™è¯¯ï¼Œç§»é™¤sessionã€‚(%s:%u: %s)", i.second->GetIP().c_str(), i.second->GetPort(), e.what()), LogType::Error);
 							tInvalidHandles.insert(i.second);
 						}
 					}
@@ -217,7 +217,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 			}
 		}
 		
-		// ÒÆ³ıËùÓĞÊ§Ğ§»á»°
+		// ç§»é™¤æ‰€æœ‰å¤±æ•ˆä¼šè¯
 		for (auto i : tInvalidHandles)
 		{
 			try
@@ -226,7 +226,7 @@ void Server::mainThreadLoop()NKNOEXCEPT
 			}
 			catch (const std::exception& e)
 			{
-				m_pLogger->Log(StringFormat("session: Ö´ĞĞinvalidÊ±·¢Éú´íÎó¡£(%s:%u: %s)", i->GetIP().c_str(), i->GetPort(), e.what()), LogType::Warning);
+				m_pLogger->Log(StringFormat("session: æ‰§è¡Œinvalidæ—¶å‘ç”Ÿé”™è¯¯ã€‚(%s:%u: %s)", i->GetIP().c_str(), i->GetPort(), e.what()), LogType::Warning);
 			}
 			m_mpClients.erase(m_mpClients.find(i->GetSocket()));
 		}

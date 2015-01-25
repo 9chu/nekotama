@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="nekotama_server" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/linux/Debug/nekotama_server" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/linux/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-Wfatal-errors" />
+					<Add option="-g" />
+					<Add option="-pthread" />
+					<Add directory="../nekotama_utils" />
+					<Add directory="../nekotama_socket" />
+					<Add directory="../nekotama_protocol" />
+					<Add directory="../extern/Bencode/Bencode" />
+				</Compiler>
+				<Linker>
+					<Add option="-pthread" />
+					<Add library="../nekotama_utils/bin/linux/Debug/libnekotama_utils.a" />
+					<Add library="../nekotama_socket/bin/linux/Debug/libnekotama_socket.a" />
+					<Add library="../nekotama_protocol/bin/linux/Debug/libnekotama_protocol.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/linux/Release/nekotama_server" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/linux/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++11" />
+					<Add option="-Wfatal-errors" />
+					<Add option="-pthread" />
+					<Add directory="../nekotama_utils" />
+					<Add directory="../nekotama_socket" />
+					<Add directory="../nekotama_protocol" />
+					<Add directory="../extern/Bencode/Bencode" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-pthread" />
+					<Add library="../nekotama_utils/bin/linux/Release/libnekotama_utils.a" />
+					<Add library="../nekotama_socket/bin/linux/Release/libnekotama_socket.a" />
+					<Add library="../nekotama_protocol/bin/linux/Release/libnekotama_protocol.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="../extern/Bencode/Bencode/Bencode.cpp" />
+		<Unit filename="../extern/Bencode/Bencode/Bencode.h" />
+		<Unit filename="ConsoleColor.cpp" />
+		<Unit filename="ConsoleColor.h" />
+		<Unit filename="Main.cpp" />
+		<Unit filename="ServerImplement.cpp" />
+		<Unit filename="ServerImplement.h" />
+		<Unit filename="StdOutLogger.cpp" />
+		<Unit filename="StdOutLogger.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

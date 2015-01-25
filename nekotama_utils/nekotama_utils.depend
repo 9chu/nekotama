@@ -1,0 +1,29 @@
+# depslib dependency file v1.0
+1422163543 source:/home/chu/workspace/nekotama/nekotama_utils/ConfigFile.cpp
+	"ConfigFile.h"
+	<fstream>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_utils/ConfigFile.h
+	<unordered_map>
+	<string>
+
+1422164545 source:/home/chu/workspace/nekotama/nekotama_utils/StringFormat.cpp
+	"StringFormat.h"
+	<cstdarg>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_utils/StringFormat.h
+	<string>
+	<cstdint>
+
+1422166532 source:/home/chu/workspace/nekotama/extern/Bencode/Bencode/Bencode.cpp
+	"Bencode.h"
+
+1422166532 /home/chu/workspace/nekotama/extern/Bencode/Bencode/Bencode.h
+	<cstdint>
+	<string>
+	<vector>
+	<map>
+	<stack>
+	<memory>
+	<stdexcept>
+

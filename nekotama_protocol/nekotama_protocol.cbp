@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="nekotama_protocol" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/linux/Debug/nekotama_protocol" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/linux/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-Wfatal-errors" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add directory="../nekotama_utils" />
+					<Add directory="../nekotama_socket" />
+					<Add directory="../extern/Bencode/Bencode" />
+				</Compiler>
+				<Linker>
+					<Add library="../nekotama_utils/bin/linux/Debug/libnekotama_utils.a" />
+					<Add library="../nekotama_socket/bin/linux/Debug/libnekotama_socket.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/linux/Release/nekotama_protocol" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/linux/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++11" />
+					<Add option="-Wall" />
+					<Add directory="../nekotama_utils" />
+					<Add directory="../nekotama_socket" />
+					<Add directory="../extern/Bencode/Bencode" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="../nekotama_utils/bin/linux/Release/libnekotama_utils.a" />
+					<Add library="../nekotama_socket/bin/linux/Release/libnekotama_socket.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<Unit filename="Client.cpp" />
+		<Unit filename="Client.h" />
+		<Unit filename="ClientSession.cpp" />
+		<Unit filename="ClientSession.h" />
+		<Unit filename="ConcurrentQueue.h" />
+		<Unit filename="ILogger.h" />
+		<Unit filename="Package.h" />
+		<Unit filename="Server.cpp" />
+		<Unit filename="Server.h" />
+		<Unit filename="VirtualIpPool.cpp" />
+		<Unit filename="VirtualIpPool.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

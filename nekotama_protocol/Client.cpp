@@ -29,7 +29,7 @@ Client::~Client()
 		{
 			m_stopFlag = true;
 			m_threadMain->join();
-		}	
+		}
 	}
 }
 
@@ -113,7 +113,7 @@ bool Client::poll(const Bencode::Value& v)
 	{
 	case PackageType::Welcome:
 		m_sServerName = PackageHelper::GetPackageField<const std::string&>(v, "name");
-		if (PackageHelper::GetPackageField<int>(v, "pmaj") != NK_PROTOCOL_MAJOR || 
+		if (PackageHelper::GetPackageField<int>(v, "pmaj") != NK_PROTOCOL_MAJOR ||
 			PackageHelper::GetPackageField<int>(v, "pmin") != NK_PROTOCOL_MINOR)
 		{
 			OnNotSupportedServerVersion();
@@ -175,6 +175,8 @@ bool Client::poll(const Bencode::Value& v)
 			OnRefreshGameInfo(tGameInfoList);
 		}
 		break;
+    default:
+        return true;
 	}
 
 	return true;
@@ -221,7 +223,7 @@ void Client::mainThreadLoop()NKNOEXCEPT
 	// 初始化发送线程
 	m_sendQueue.Clear();
 	thread tSendThread(bind(&Client::sendThreadLoop, this));
-	
+
 	// 启动主循环
 	Decoder tDecoder;
 	SocketHandleSet tReadTestSet;

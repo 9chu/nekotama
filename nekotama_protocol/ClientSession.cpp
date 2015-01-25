@@ -10,10 +10,10 @@ using namespace nekotama;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static const chrono::milliseconds sc_RecvTimeout(20000);  // 20ÃëÊÕ·¢ÑÓ³Ù
-static const chrono::milliseconds sc_LoginTimeout(15000);  // 15ÃëµÇÂ½ÑÓ³Ù
-static const chrono::milliseconds sc_PingPeriod(3000);  // 3Ãë·¢ËÍ1ping
-static const chrono::milliseconds sc_PongTimeout(5000);  // 5ÃëpongÑÓ³Ù
+static const chrono::milliseconds sc_RecvTimeout(20000);  // 20ç§’æ”¶å‘å»¶è¿Ÿ
+static const chrono::milliseconds sc_LoginTimeout(15000);  // 15ç§’ç™»é™†å»¶è¿Ÿ
+static const chrono::milliseconds sc_PingPeriod(3000);  // 3ç§’å‘é€1ping
+static const chrono::milliseconds sc_PongTimeout(5000);  // 5ç§’pongå»¶è¿Ÿ
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -22,17 +22,17 @@ ClientSession::ClientSession(Server* server, SocketHandle handle, const std::str
 	m_iState(ClientSessionState::Invalid), m_bShouldBeClosed(false), m_iBytesRecved(0), m_iLastDataNotSent(0),
 	m_bPingSent(false)
 {
-	// ¼ì²é»á»°ÉÏÏŞ
+	// æ£€æŸ¥ä¼šè¯ä¸Šé™
 	if (count >= server->GetMaxClients())
 	{
-		m_pLogger->Log(StringFormat("Á¬½ÓÈËÊı´ïµ½·şÎñÆ÷ÉÏÏŞ£¬ÒÑ¾Ü¾øÁ¬½Ó¡£(%s:%u)", m_sIP.c_str(), m_uPort), LogType::Error);
+		m_pLogger->Log(StringFormat("è¿æ¥äººæ•°è¾¾åˆ°æœåŠ¡å™¨ä¸Šé™ï¼Œå·²æ‹’ç»è¿æ¥ã€‚(%s:%u)", m_sIP.c_str(), m_uPort), LogType::Error);
 		sendKicked(KickReason::ServerIsFull);
 		m_iState = ClientSessionState::CloseAfterSend;
 		m_pServer->OnClientArrival(this, true);
 	}
 	else
 	{
-		m_pLogger->Log(StringFormat("ÒÑ½¨Á¢µ½¿Í»§¶ËµÄÁ¬½Ó£¬µÈ´ıµÇÂ½ÏìÓ¦¡£(%s:%u)", m_sIP.c_str(), m_uPort));
+		m_pLogger->Log(StringFormat("å·²å»ºç«‹åˆ°å®¢æˆ·ç«¯çš„è¿æ¥ï¼Œç­‰å¾…ç™»é™†å“åº”ã€‚(%s:%u)", m_sIP.c_str(), m_uPort));
 		sendWelcome(m_pServer->GetServerName(), NK_PROTOCOL_MAJOR, NK_PROTOCOL_MINOR);
 		m_iState = ClientSessionState::WaitForLogin;
 		m_pServer->OnClientArrival(this, false);
@@ -47,9 +47,9 @@ ClientSession::~ClientSession()
 	}
 	catch (const std::exception& e)
 	{
-		m_pLogger->Log(StringFormat("ÏìÓ¦¿Í»§¶Ë¶Ï¿ªÊÂ¼şÊ±·¢ÉúÒì³£¡£(%s:%u: %s)", m_sIP.c_str(), m_uPort, e.what()));
+		m_pLogger->Log(StringFormat("å“åº”å®¢æˆ·ç«¯æ–­å¼€äº‹ä»¶æ—¶å‘ç”Ÿå¼‚å¸¸ã€‚(%s:%u: %s)", m_sIP.c_str(), m_uPort, e.what()));
 	}
-	m_pLogger->Log(StringFormat("ÒÑ¶Ï¿ªµ½¿Í»§¶ËµÄÁ¬½Ó¡£(%s:%u)", m_sIP.c_str(), m_uPort));
+	m_pLogger->Log(StringFormat("å·²æ–­å¼€åˆ°å®¢æˆ·ç«¯çš„è¿æ¥ã€‚(%s:%u)", m_sIP.c_str(), m_uPort));
 }
 
 void ClientSession::ForwardingPackage(const std::string& source_addr, uint16_t source_port, uint16_t target_port, const std::string& data)
@@ -143,14 +143,14 @@ void ClientSession::poll(const Bencode::Value& v)
 		{
 			std::string tNickname = PackageHelper::GetPackageField<const string&>(v, "nick");
 			std::string tAddr;
-			uint16_t tPort = 10800;  // ·ÇÏëÌìÔòµÄÄ¬ÈÏÓÎÏ·¶Ë¿Ú
+			uint16_t tPort = 10800;  // éæƒ³å¤©åˆ™çš„é»˜è®¤æ¸¸æˆç«¯å£
 			if (m_pServer->OnClientLogin(this, tNickname, tAddr, tPort))
 			{
 				m_Nickname = tNickname;
 				m_VirtualAddr = tAddr;
 				m_GamePort = tPort;
-				
-				sendLoginConfirm(tNickname, tAddr, tPort);  // µÇÂ½³É¹¦
+
+				sendLoginConfirm(tNickname, tAddr, tPort);  // ç™»é™†æˆåŠŸ
 				m_iState = ClientSessionState::Logined;
 				m_bPingSent = false;
 				m_iPongTimer = chrono::milliseconds::zero();
@@ -158,15 +158,15 @@ void ClientSession::poll(const Bencode::Value& v)
 				m_iRecvTimer = chrono::milliseconds::zero();
 				m_iDelay = chrono::milliseconds::zero();
 
-				m_pLogger->Log(StringFormat("¿Í»§¶ËµÇÂ½³É¹¦£¬êÇ³Æ: %s£¬ĞéÄâip: %s¡£(%s:%u)", tNickname.c_str(), tAddr.c_str(), m_sIP.c_str(), m_uPort));
+				m_pLogger->Log(StringFormat("å®¢æˆ·ç«¯ç™»é™†æˆåŠŸï¼Œæ˜µç§°: %sï¼Œè™šæ‹Ÿip: %sã€‚(%s:%u)", tNickname.c_str(), tAddr.c_str(), m_sIP.c_str(), m_uPort));
 			}
 			else
 			{
-				m_pLogger->Log(StringFormat("¿Í»§¶ËµÇÂ½Ê§°Ü¡£(%s:%u)", m_sIP.c_str(), m_uPort));
+				m_pLogger->Log(StringFormat("å®¢æˆ·ç«¯ç™»é™†å¤±è´¥ã€‚(%s:%u)", m_sIP.c_str(), m_uPort));
 
-				sendKicked(KickReason::LoginFailed);  // µÇÂ½Ê§°Ü
+				sendKicked(KickReason::LoginFailed);  // ç™»é™†å¤±è´¥
 				m_iState = ClientSessionState::CloseAfterSend;
-			}	
+			}
 		}
 		break;
 	case PackageType::Pong:
@@ -180,7 +180,7 @@ void ClientSession::poll(const Bencode::Value& v)
 	case PackageType::Logout:
 		m_iState = ClientSessionState::CloseAfterSend;
 		m_bShouldBeClosed = true;
-		m_pLogger->Log(StringFormat("¿Í»§¶ËµÇ³ö£¬êÇ³Æ: %s£¬ĞéÄâip: %s¡£(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
+		m_pLogger->Log(StringFormat("å®¢æˆ·ç«¯ç™»å‡ºï¼Œæ˜µç§°: %sï¼Œè™šæ‹Ÿip: %sã€‚(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
 		m_pServer->OnClientLogout(this);
 		break;
 	case PackageType::SendPackage:
@@ -196,16 +196,16 @@ void ClientSession::poll(const Bencode::Value& v)
 	case PackageType::CreateHost:
 		if (m_iState == ClientSessionState::Logined)
 		{
-			m_pLogger->Log(StringFormat("¿Í»§¶Ë´´½¨ÓÎÏ·£¬êÇ³Æ: %s£¬ĞéÄâip: %s¡£(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
+			m_pLogger->Log(StringFormat("å®¢æˆ·ç«¯åˆ›å»ºæ¸¸æˆï¼Œæ˜µç§°: %sï¼Œè™šæ‹Ÿip: %sã€‚(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
 			m_pServer->OnClientHostCreated(this);
-		}	
+		}
 		break;
 	case PackageType::DestroyHost:
 		if (m_iState == ClientSessionState::Logined)
 		{
-			m_pLogger->Log(StringFormat("¿Í»§¶Ë¹Ø±ÕÓÎÏ·£¬êÇ³Æ: %s£¬ĞéÄâip: %s¡£(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
+			m_pLogger->Log(StringFormat("å®¢æˆ·ç«¯å…³é—­æ¸¸æˆï¼Œæ˜µç§°: %sï¼Œè™šæ‹Ÿip: %sã€‚(%s:%u)", m_Nickname.c_str(), m_VirtualAddr.c_str(), m_sIP.c_str(), m_uPort));
 			m_pServer->OnClientHostDestroyed(this);
-		}	
+		}
 		break;
 	case PackageType::QueryGame:
 		if (m_iState == ClientSessionState::Logined)
@@ -245,7 +245,7 @@ void ClientSession::recv()
 			}
 			else
 				break;
-		} while (tReaded >= sizeof(tBuf));  // µ±ÇÒ½öµ±tReaded == sizeof(tBuf)Ê±ËµÃ÷»¹ÓĞÊı¾İÃ»¶ÁÍê
+		} while (tReaded >= sizeof(tBuf));  // å½“ä¸”ä»…å½“tReaded == sizeof(tBuf)æ—¶è¯´æ˜è¿˜æœ‰æ•°æ®æ²¡è¯»å®Œ
 	}
 }
 
@@ -261,7 +261,7 @@ void ClientSession::send()
 			else
 				return;
 		}
-		
+
 		while (!m_dataBuf.empty())
 		{
 			m_sLastData = m_dataBuf.front();
@@ -309,6 +309,8 @@ void ClientSession::update(std::chrono::milliseconds tick)
 				m_iPingTimer = chrono::milliseconds::zero();
 			}
 		}
+		break;
+    default:
 		break;
 	}
 

@@ -19,7 +19,7 @@ namespace nekotama
 		bool IsEmpty()const
 		{
 			std::unique_lock<std::mutex> lock(m_Mutex);
-			return the_queue.empty();
+			return m_Queue.empty();
 		}
 		void Clear()
 		{

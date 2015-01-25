@@ -1,0 +1,83 @@
+# depslib dependency file v1.0
+1422167072 source:/home/chu/workspace/nekotama/nekotama_protocol/Client.cpp
+	"Client.h"
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/Client.h
+	<cstdint>
+	<string>
+	<atomic>
+	<thread>
+	<ISocket.h>
+	<Bencode.h>
+	"ConcurrentQueue.h"
+	"ILogger.h"
+	"Package.h"
+
+1422163543 /home/chu/workspace/nekotama/nekotama_socket/ISocket.h
+	<memory>
+	<cstdint>
+	<unordered_set>
+	<string>
+	<StringFormat.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_utils/StringFormat.h
+	<string>
+	<cstdint>
+
+1422166532 /home/chu/workspace/nekotama/extern/Bencode/Bencode/Bencode.h
+	<cstdint>
+	<string>
+	<vector>
+	<map>
+	<stack>
+	<memory>
+	<stdexcept>
+
+1422166993 /home/chu/workspace/nekotama/nekotama_protocol/ConcurrentQueue.h
+	<mutex>
+	<queue>
+	<condition_variable>
+	<StringFormat.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/ILogger.h
+	<string>
+	<StringFormat.h>
+
+1422167320 /home/chu/workspace/nekotama/nekotama_protocol/Package.h
+	<stdexcept>
+	<string>
+	<ISocket.h>
+	<Bencode.h>
+
+1422167120 source:/home/chu/workspace/nekotama/nekotama_protocol/ClientSession.cpp
+	"ClientSession.h"
+	"Server.h"
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/ClientSession.h
+	<deque>
+	<chrono>
+	<set>
+	<Bencode.h>
+	<ISocket.h>
+	"Package.h"
+	"ILogger.h"
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/Server.h
+	<atomic>
+	<thread>
+	<stdexcept>
+	<unordered_map>
+	"ClientSession.h"
+
+1422163543 source:/home/chu/workspace/nekotama/nekotama_protocol/Server.cpp
+	"Server.h"
+
+1422163543 source:/home/chu/workspace/nekotama/nekotama_protocol/VirtualIpPool.cpp
+	"VirtualIpPool.h"
+	<StringFormat.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/VirtualIpPool.h
+	<cstdint>
+	<vector>
+	<string>
+

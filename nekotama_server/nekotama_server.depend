@@ -1,0 +1,95 @@
+# depslib dependency file v1.0
+1422168351 source:/home/chu/workspace/nekotama/nekotama_server/ConsoleColor.cpp
+	"ConsoleColor.h"
+	<cstdio>
+	<Windows.h>
+
+1422168440 /home/chu/workspace/nekotama/nekotama_server/ConsoleColor.h
+
+1422168050 source:/home/chu/workspace/nekotama/nekotama_server/Main.cpp
+	"ServerImplement.h"
+	"StdOutLogger.h"
+	<ConfigFile.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_server/ServerImplement.h
+	<Server.h>
+	<VirtualIpPool.h>
+	"StdOutLogger.h"
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/Server.h
+	<atomic>
+	<thread>
+	<stdexcept>
+	<unordered_map>
+	"ClientSession.h"
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/ClientSession.h
+	<deque>
+	<chrono>
+	<set>
+	<Bencode.h>
+	<ISocket.h>
+	"Package.h"
+	"ILogger.h"
+
+1422166532 /home/chu/workspace/nekotama/extern/Bencode/Bencode/Bencode.h
+	<cstdint>
+	<string>
+	<vector>
+	<map>
+	<stack>
+	<memory>
+	<stdexcept>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_socket/ISocket.h
+	<memory>
+	<cstdint>
+	<unordered_set>
+	<string>
+	<StringFormat.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_utils/StringFormat.h
+	<string>
+	<cstdint>
+
+1422167320 /home/chu/workspace/nekotama/nekotama_protocol/Package.h
+	<stdexcept>
+	<string>
+	<ISocket.h>
+	<Bencode.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/ILogger.h
+	<string>
+	<StringFormat.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_protocol/VirtualIpPool.h
+	<cstdint>
+	<vector>
+	<string>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_server/StdOutLogger.h
+	<mutex>
+	<iostream>
+	<ILogger.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_utils/ConfigFile.h
+	<unordered_map>
+	<string>
+
+1422163543 source:/home/chu/workspace/nekotama/nekotama_server/ServerImplement.cpp
+	"ServerImplement.h"
+	<algorithm>
+	<Socket.h>
+
+1422163543 /home/chu/workspace/nekotama/nekotama_socket/Socket.h
+	<string>
+	<stdexcept>
+	"ISocket.h"
+
+1422168225 source:/home/chu/workspace/nekotama/nekotama_server/StdOutLogger.cpp
+	"StdOutLogger.h"
+	"ConsoleColor.h"
+
+1422166532 source:/home/chu/workspace/nekotama/extern/Bencode/Bencode/Bencode.cpp
+	"Bencode.h"
+

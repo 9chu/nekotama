@@ -17,17 +17,17 @@ int main()
 	tConfig["port"] = "12801";
 	tConfig["max"] = "16";
 	if (!tConfig.Load(SERVER_CONFIG_PATH, true))
-		 StdOutLogger::GetInstance().Log("Î´ÕÒµ½ÅäÖÃÎÄ¼ş£¬Ê¹ÓÃÄ¬ÈÏÅäÖÃ¡£", LogType::Warning);
+		 StdOutLogger::GetInstance().Log("æœªæ‰¾åˆ°é…ç½®æ–‡ä»¶ï¼Œä½¿ç”¨é»˜è®¤é…ç½®ã€‚", LogType::Warning);
 	int tMaxClient = atoi(tConfig["max"].c_str());
 	if (tMaxClient < 1)
 	{
-		StdOutLogger::GetInstance().Log("ÎŞĞ§µÄ×î´ó¿Í»§Êı£¬Ê¹ÓÃÄ¬ÈÏÅäÖÃ¡£", LogType::Warning);
+		StdOutLogger::GetInstance().Log("æ— æ•ˆçš„æœ€å¤§å®¢æˆ·æ•°ï¼Œä½¿ç”¨é»˜è®¤é…ç½®ã€‚", LogType::Warning);
 		tMaxClient = 16;
 	}
 	int tPort = atoi(tConfig["port"].c_str());
 	if (tPort <= 1024 || tPort > 65535)
 	{
-		StdOutLogger::GetInstance().Log("ÎŞĞ§µÄ¶Ë¿Ú£¬Ê¹ÓÃÄ¬ÈÏÅäÖÃ¡£", LogType::Warning);
+		StdOutLogger::GetInstance().Log("æ— æ•ˆçš„ç«¯å£ï¼Œä½¿ç”¨é»˜è®¤é…ç½®ã€‚", LogType::Warning);
 		tPort = 12801;
 	}
 

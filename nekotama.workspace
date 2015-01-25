@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="nekotama_utils/nekotama_utils.cbp" />
+		<Project filename="nekotama_socket/nekotama_socket.cbp" />
+		<Project filename="nekotama_server/nekotama_server.cbp" />
+		<Project filename="nekotama_protocol/nekotama_protocol.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

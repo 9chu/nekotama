@@ -7,7 +7,7 @@ using namespace nekotama;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::string nekotama::StringFormat(const char* Format, ...)
+std::string nekotama::StringFormat(const char* Format, ...)NKNOEXCEPT
 {
 	std::string tRet;
 	va_list vaptr;

@@ -79,10 +79,10 @@ namespace nekotama
 	namespace PackageHelper
 	{
 		template<typename T>
-		static T GetPackageField(const Bencode::Value& v, const std::string& field);
+        T GetPackageField(const Bencode::Value& v, const std::string& field);
 
 		template<>
-		static int GetPackageField(const Bencode::Value& v, const std::string& field)
+        inline int GetPackageField(const Bencode::Value& v, const std::string& field)
 		{
 			if (v.Type != Bencode::ValueType::Dictionary)
 				throw std::logic_error("invalid package format.");
@@ -95,7 +95,7 @@ namespace nekotama
 		}
 
 		template<>
-		static const std::string& GetPackageField(const Bencode::Value& v, const std::string& field)
+        inline const std::string& GetPackageField(const Bencode::Value& v, const std::string& field)
 		{
 			if (v.Type != Bencode::ValueType::Dictionary)
 				throw std::logic_error("invalid package format.");

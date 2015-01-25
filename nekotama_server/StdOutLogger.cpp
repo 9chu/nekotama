@@ -20,15 +20,15 @@ void StdOutLogger::Log(const std::string& info, LogType type)NKNOEXCEPT
 	{
 	case LogType::Infomation:
 		SetConsoleTextColor(ConsoleColors::Grey);
-		printf("[ĞÅÏ¢] %s\n", info.c_str());
+		printf("[ä¿¡æ¯] %s\n", info.c_str());
 		break;
 	case LogType::Warning:
 		SetConsoleTextColor(ConsoleColors::Yellow);
-		printf("[¾¯¸æ] %s\n", info.c_str());
+		printf("[è­¦å‘Š] %s\n", info.c_str());
 		break;
 	case LogType::Error:
 		SetConsoleTextColor(ConsoleColors::RedOrange);
-		printf("[´íÎó] %s\n", info.c_str());
+		printf("[é”™è¯¯] %s\n", info.c_str());
 		break;
 	}
 }
