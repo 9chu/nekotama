@@ -33,6 +33,7 @@
 				<Option createDefFile="1" />
 				<Compiler>
 					<Add option="-O3" />
+					<Add option="-std=c++11" />
 					<Add option="-Wfatal-errors" />
 					<Add option="-Wall" />
 					<Add directory="../nekotama_utils" />

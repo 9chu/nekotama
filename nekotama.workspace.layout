@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_layout_file>
-	<ActiveProject path="nekotama_server/nekotama_server.cbp" />
-	<PreferredTarget name="Debug" />
+	<ActiveProject path="nekotama_utils/nekotama_utils.cbp" />
+	<PreferredTarget name="Release" />
 </CodeBlocks_workspace_layout_file>

@@ -6,8 +6,7 @@
 
 1422168440 /home/chu/workspace/nekotama/nekotama_server/ConsoleColor.h
 
-1422168050 source:/home/chu/workspace/nekotama/nekotama_server/Main.cpp
-	"ServerImplement.h"
+1422175027 source:/home/chu/workspace/nekotama/nekotama_server/Main.cpp
 	"StdOutLogger.h"
 	<ConfigFile.h>
 
@@ -86,8 +85,7 @@
 	<stdexcept>
 	"ISocket.h"
 
-1422168225 source:/home/chu/workspace/nekotama/nekotama_server/StdOutLogger.cpp
-	"StdOutLogger.h"
+1422175027 source:/home/chu/workspace/nekotama/nekotama_server/StdOutLogger.cpp
 	"ConsoleColor.h"
 
 1422166532 source:/home/chu/workspace/nekotama/extern/Bencode/Bencode/Bencode.cpp
